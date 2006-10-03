@@ -1,0 +1,68 @@
+<registry>
+
+  <components>
+    <component type="sample"
+               base="flumotion/component/sample">
+      <source location="flumotion.component.sample.sample" />
+      <eater name="default" />
+      <feeder name="default" />
+
+      <entries>
+        <entry type="component" location="sample.py"
+               function="Sample" />
+        <entry type="admin/gtk" location="admin_gtk.py"
+               function="GUIClass" />
+      </entries>
+
+      <properties>
+        <property name="horizontal" type="bool" />
+        <property name="vertical" type="bool" />
+      </properties>
+    </component>
+  </components>
+
+  <bundles>
+
+    <bundle project="template" name="sample-base">
+        <dependencies>
+            <dependency name="component-base" />
+        </dependencies>
+
+        <directories>
+            <directory name="flumotion/component/sample">
+                <filename location="__init__.py" />
+                <filename location="common.py" />
+            </directory>
+        </directories>
+    </bundle>
+
+    <bundle project="template" name="sample-admin-gtk">
+      <dependencies>
+        <dependency name="sample-base" />
+        <dependency name="base-admin-gtk" />
+      </dependencies>
+
+      <directories>
+        <directory name="flumotion/component/sample">
+          <filename location="admin_gtk.py" />
+          <filename location="sample.glade" />
+        </directory>
+      </directories>
+    </bundle>
+
+    <bundle project="template" name="sample-component">
+        <dependencies>
+            <dependency name="component" />
+            <dependency name="sample-base" />
+        </dependencies>
+
+        <directories>
+            <directory name="flumotion/component/sample">
+                <filename location="sample.py" />
+            </directory>
+        </directories>
+    </bundle>
+
+  </bundles>
+
+</registry> 
