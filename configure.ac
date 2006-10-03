@@ -1,13 +1,13 @@
 AC_INIT(README)
 
-AS_VERSION(flumotion-template, FT, 0, 2, 0, 1)
+AS_VERSION(flumotion-dvb, FT, 0, 3, 0, 1)
 AC_SUBST(RELEASE, $FT_RELEASE)
 
 AC_SUBST_FILE(AUTHORS)
 AUTHORS=$srcdir/AUTHORS
 
 AC_SUBST(PYGTK_REQ, 2.4.0)
-AC_SUBST(FLU_REQ, 0.2.0)
+AC_SUBST(FLU_REQ, 0.3.0)
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
 
@@ -84,11 +84,11 @@ AM_CONDITIONAL(HAVE_PYCHECKER, test "x$PYCHECKER" = "xyes")
 dnl check for Twisted
 AS_PYTHON_IMPORT(twisted,
   [
-  AC_MSG_CHECKING(for Twisted >= 1.3.0)
+  AC_MSG_CHECKING(for Twisted >= 2.0.1)
   prog="
 import sys
 import twisted.copyright
-minver = '1.3.0'
+minver = '2.0.1'
 if twisted.copyright.version < minver:
     sys.exit(1)
 sys.exit(0)
@@ -98,11 +98,11 @@ sys.exit(0)
     AC_MSG_RESULT(found)
   else
     AC_MSG_RESULT(too old)
-    AC_MSG_ERROR([You need at least version 1.3.0 of Twisted])
+    AC_MSG_ERROR([You need at least version 2.0.1 of Twisted])
   fi
   ]
   ,
-  AC_MSG_ERROR([You need at least version 1.3.0 of Twisted])
+  AC_MSG_ERROR([You need at least version 2.0.1 of Twisted])
 )
 
 dnl check for flumotion
@@ -114,8 +114,8 @@ AC_SUBST(FLUMOTION_DIR)
 PREAMBLE=`cat $srcdir/misc/preamble.py`
 
 dnl output stuff
-FLUMOTION_SETUP(flumotion/test/setup.py, $FLUMOTION_DIR, $PREAMBLE, template)
-FLUMOTION_SETUP(misc/setup.py, $FLUMOTION_DIR, $PREAMBLE, template)
+FLUMOTION_SETUP(flumotion/test/setup.py, $FLUMOTION_DIR, $PREAMBLE, dvb)
+FLUMOTION_SETUP(misc/setup.py, $FLUMOTION_DIR, $PREAMBLE, dvb)
 
 dnl output stuff
 AC_OUTPUT(
@@ -124,10 +124,10 @@ common/Makefile
 flumotion/Makefile
 flumotion/test/Makefile
 flumotion/component/Makefile
-flumotion/component/sample/Makefile
+flumotion/component/dvb/Makefile
 flumotion/project/Makefile
-flumotion/project/template.py
+flumotion/project/dvb.py
 misc/Makefile
-flumotion-template.spec
+flumotion-dvb.spec
 po/Makefile.in
 )
