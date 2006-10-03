@@ -1,4 +1,4 @@
-# -*- Mode: Python -*-
+# -*- Mode: Python; test-case-name: flumotion.test.test_sample_common -*-
 # vi:si:et:sw=4:sts=4:ts=4
 #
 # Flumotion - a streaming media server
@@ -17,3 +17,21 @@
 # See "LICENSE.Flumotion" in the source distribution for more information.
 
 # Headers in this file shall remain intact.
+
+__values = {
+    0: (False, False),
+    2: (True, True),
+    4: (True, False),
+    5: (False, True),
+}
+
+def getBooleans(method):
+    # convert a method number to a hor, ver boolean tuple
+    return __values[method]
+
+def getMethod(horizontal, vertical):
+    for m, t in __values.items():
+        if t == (horizontal, vertical):
+            return m
+
+    raise IndexError

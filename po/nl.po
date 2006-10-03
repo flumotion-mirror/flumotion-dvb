@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: flumotion-template 0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-02-06 11:18+0100\n"
+"POT-Creation-Date: 2006-04-14 12:25+0200\n"
 "PO-Revision-Date: 2005-07-28 12:41+0200\n"
 "Last-Translator: Thomas Vander Stichele <thomas at fluendo dot com>\n"
 "Language-Team: Fluendo\n"
@@ -14,19 +14,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: flumotion/component/dvb/dvb.py:49
-#, python-format
-msgid "To use DVB-%s mode, you need to specify property '%s'."
-msgstr ""
+#: flumotion/component/sample/sample.glade:7
+msgid "Sample"
+msgstr "Voorbeeld"
 
-#~ msgid "Sample"
-#~ msgstr "Voorbeeld"
+#: flumotion/component/sample/sample.glade:33
+msgid "Flip h_orizontally"
+msgstr "H_orizontaal spiegelen"
 
-#~ msgid "Flip h_orizontally"
-#~ msgstr "H_orizontaal spiegelen"
+#: flumotion/component/sample/sample.glade:57
+msgid "Flip _vertically"
+msgstr "_Verticaal spiegelen"
 
-#~ msgid "Flip _vertically"
-#~ msgstr "_Verticaal spiegelen"
-
-#~ msgid "Flipping"
-#~ msgstr "Spiegelen"
+#: flumotion/component/sample/admin_gtk.py:100
+msgid "Flipping"
+msgstr "Spiegelen"

@@ -1,23 +1,23 @@
 Name:           @PACKAGE@
 Version:        @VERSION@
-Release:        @PACKAGE_VERSION_RELEASE@%{?dist}
-Summary:        Flumotion DVB support
+Release:        @RELEASE@
+Summary:        Flumotion Template.
 
 Group:          Applications/Internet
-License:	Proprietary
+License:	GPL
 URL:            http://www.fluendo.com/
 Source:         %{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
-Requires:	flumotion > @FLU_REQ@
+Requires:	flumotion > 0.1.6
 
 BuildRequires:	gettext
 BuildRequires:	python >= 2.3
 #BuildRequires:	epydoc
-BuildRequires:  flumotion
+BuildArch:	noarch
 
 %description
-Flumotion DVB support.
+Flumotion Template.
 
 %prep
 %setup -q
@@ -32,16 +32,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %makeinstall
 
-%find_lang flumotion-dvb
+%find_lang flumotion-template
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f flumotion-dvb.lang
+%files -f flumotion-template.lang
 %defattr(-,root,root,-)
 %doc ChangeLog COPYING README AUTHORS LICENSE.Flumotion LICENSE.GPL
 %{_libdir}/flumotion
 
 %changelog
-* Sun Nov 05 2006 Thomas Vander Stichele <thomas at apestaart dot org>
+* Wed Apr 20 2005 Thomas Vander Stichele <thomas at apestaart dot org>
 - first spec
