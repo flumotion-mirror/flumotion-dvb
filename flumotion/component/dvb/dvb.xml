@@ -1,0 +1,64 @@
+<registry>
+  <components>
+    <component type="dvb"
+               base="flumotion/component/dvb">
+      <source location="flumotion.component.dvb.dvb" />
+      <feeder name="audio"/>
+      <feeder name="video"/>
+      <entries>
+        <entry type="component" location="dvb.py"
+               function="DVB" />
+      </entries>
+
+      <synchronization required="yes" clock-priority="160"/>
+
+      <properties>
+        <property name="dvb-type" type="string" required="true" />
+	<property name="freq" type="int" required="true" />
+	<property name="pids" type="string" required="true" />
+	<!-- DVB-T specific properties -->
+        <property name="modulation" type="int" />
+        <property name="trans-mode" type="int" />
+        <property name="bandwidth" type="int" />
+        <property name="code-rate-lp" type="string" />
+	<property name="code-rate-hp" type="fraction" />
+	<property name="guard" type="int" />
+	<property name="hierarchy" type="int" />
+	<!-- DVB-S specific properties -->
+	<property name="polarity" type="string" />
+	<property name="symbol-rate" type="string" />
+	<property name="satellite-number" type="int" />	
+	<!-- output properties -->
+	<property name="width" type="int" />
+	<property name="height" type="int" />
+	<property name="framerate" type="fraction" />
+      </properties>
+    </component>
+  </components>
+  <bundles>
+    <bundle project="dvb" name="dvb-base">
+       <dependencies>
+           <dependency name="component-base" />
+       </dependencies>
+
+       <directories>
+           <directory name="flumotion/component/dvb">
+               <filename location="__init__.py" />
+           </directory>
+       </directories>
+    </bundle>
+
+    <bundle project="dvb" name="dvb-component">
+       <dependencies>
+           <dependency name="component" />
+           <dependency name="dvb-base" />
+       </dependencies>
+
+       <directories>
+           <directory name="flumotion/component/dvb">
+               <filename location="dvb.py" />
+           </directory>
+       </directories>
+    </bundle>
+  </bundles>
+</registry> 

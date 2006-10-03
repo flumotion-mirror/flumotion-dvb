@@ -1,10 +1,9 @@
 include $(top_srcdir)/common/python.mk
 
-component_PYTHON = __init__.py sample.py admin_gtk.py common.py
-componentdir = $(libdir)/flumotion/python/flumotion/component/sample
+component_PYTHON = __init__.py dvb.py
+componentdir = $(libdir)/flumotion/python/flumotion/component/dvb
 component_DATA = \
-	sample.xml \
-	sample.glade
+	dvb.xml
 
 clean-local:
 	rm -rf *.pyc *.pyo
