@@ -3,15 +3,15 @@ include $(top_srcdir)/common/locale.mk
 
 flumotiondir = $(libdir)/flumotion/python/flumotion/project
 
-flumotion_PYTHON = template.py
-flumotion_DATA = template.locale.xml
+flumotion_PYTHON = dvb.py
+flumotion_DATA = dvb.locale.xml
 
 clean-local:
 	rm -f *.pyc *.pyo
 
-PROJECT = template
+PROJECT = dvb
 
-BUILT_SOURCES = template.py template.locale.xml
+BUILT_SOURCES = dvb.py dvb.locale.xml
 CLEANFILES = $(BUILT_SOURCES)
 
-EXTRA_DIST = template.py.in
+EXTRA_DIST = dvb.py.in
