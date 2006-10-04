@@ -67,25 +67,30 @@ hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
 dvbsrc pol=%(polarity)s srate=%(symbol_rate)s 
 diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
     sat=sat)
-        width = props.get('width', 720)
-        height = props.get('height', int(576 * width/720.)) # assuming PAL :-/
+        # we only want to scale if specifically told to in config
+        scaling_template = ""
+        if "width" in props and "height" in props:
+            width = props.get('width')
+            height = props.get('height')
+            scaling_template = '''
+videoscale ! video/x-raw-yuv,width=%d, height=%d''' % (width, height)
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
         freq = props.get('frequency')
         pids = props.get('pids')
-        template = ('%s freq=%(freq)d pids=%(pids)s'
+        template = ('%(dvbsrc)s freq=%(freq)d pids=%(pids)s'
                     ' ! flutsdemux name=demux es-pids=%(pids)s'
                     '  demux. ! queue max-size-buffers=0 max-size-time=0 '
                     ' ! video/mpeg ! mpeg2dec'
                     '    ! video/x-raw-yuv,format=(fourcc)I420'
-                    '    ! videoscale'
-                    '    ! video/x-raw-yuv,width=%(w)s,height=%(h)s,format=(fourcc)I420'
+                    '    ! %(scaling)s'
+                    '    ! videorate'
+                    '    ! video/x-raw-yuv,framerate=%(fr)s'
                     '    ! @feeder::video@'
                     '  demux. ! queue max-size-buffers=0 max-size-time=0'
                     ' ! audio/mpeg ! mad'
-                    ' ! @feeder::audio@'
-                    % (dvbsrc_template, 
-                       dict(freq=freq, pids=pids, w=width, h=height,
-                           fr=fr)))
-
+                    ' ! audiorate ! @feeder::audio@'
+                    % dict(freq=freq, pids=pids, w=width, h=height,
+                           fr=fr, dvbsrc=dvbsrc_template, 
+                           scaling=scaling_template))
         return template
