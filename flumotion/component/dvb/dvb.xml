@@ -3,8 +3,9 @@
     <component type="dvb"
                base="flumotion/component/dvb">
       <source location="flumotion.component.dvb.dvb" />
-      <feeder name="audio"/>
-      <feeder name="video"/>
+      <feeder name="audio" />
+      <feeder name="video" />
+      <feeder name="mpegts" />
       <entries>
         <entry type="component" location="dvb.py"
                function="DVB" />

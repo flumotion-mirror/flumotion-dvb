@@ -1,6 +1,12 @@
 2006-10-04  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py:
+	* flumotion/component/dvb/dvb.xml:
+	Add a mpegts feeder to dvb.
+
+2006-10-04  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py:
 	Only scale if requested.  Add videorate and audiorate.
 
 2006-10-04  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
