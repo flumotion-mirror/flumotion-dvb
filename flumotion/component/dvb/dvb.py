@@ -89,7 +89,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     '    ! @feeder::video@'
                     ' demux. ! queue max-size-buffers=0 max-size-time=0'
                     '    ! audio/mpeg ! mad ! audiorate ! @feeder::audio@'
-                    ' t. ! @feeder:mpegts@'
+                    ' t. ! @feeder::mpegts@'
                     % dict(freq=freq, pids=pids, 
                            fr=fr, dvbsrc=dvbsrc_template, 
                            scaling=scaling_template))
