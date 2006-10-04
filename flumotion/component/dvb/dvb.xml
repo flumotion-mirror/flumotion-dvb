@@ -14,7 +14,7 @@
 
       <properties>
         <property name="dvb-type" type="string" required="true" />
-	<property name="freq" type="int" required="true" />
+	<property name="frequency" type="int" required="true" />
 	<property name="pids" type="string" required="true" />
 	<!-- DVB-T specific properties -->
         <property name="modulation" type="int" />
