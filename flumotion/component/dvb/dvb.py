@@ -73,7 +73,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         framerate_float = float(framerate[0]) / framerate[1]
         freq = props.get('frequency')
         pids = props.get('pids')
-        template = ('%s freq=(frequency) pids=$(pids)s'
+        template = ('dvbsrc freq=%(freq)d pids=%(pids)s'
                     ' ! flutsdemux name=demux es-pids=%(pids)s'
                     '  demux. ! queue max-size-buffers=0 max-size-time=0 '
                     ' ! video/mpeg ! mpeg2dec'
