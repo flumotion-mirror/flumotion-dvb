@@ -81,30 +81,6 @@ dnl check for pychecker
 AC_CHECK_PROG(PYCHECKER, pychecker, yes, no)
 AM_CONDITIONAL(HAVE_PYCHECKER, test "x$PYCHECKER" = "xyes")
 
-dnl check for Twisted
-AS_PYTHON_IMPORT(twisted,
-  [
-  AC_MSG_CHECKING(for Twisted >= 2.0.1)
-  prog="
-import sys
-import twisted.copyright
-minver = '2.0.1'
-if twisted.copyright.version < minver:
-    sys.exit(1)
-sys.exit(0)
-"
-  if $PYTHON -c "$prog" 1>&AC_FD_CC 2>&AC_FD_CC
-  then
-    AC_MSG_RESULT(found)
-  else
-    AC_MSG_RESULT(too old)
-    AC_MSG_ERROR([You need at least version 2.0.1 of Twisted])
-  fi
-  ]
-  ,
-  AC_MSG_ERROR([You need at least version 2.0.1 of Twisted])
-)
-
 dnl check for flumotion
 PKG_CHECK_MODULES(FLUMOTION, flumotion >= $FLU_REQ)
 FLUMOTION_DIR="`$PKG_CONFIG --variable=flumotiondir flumotion`"
