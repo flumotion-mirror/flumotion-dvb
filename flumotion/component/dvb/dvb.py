@@ -70,7 +70,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         width = props.get('width', 720)
         height = props.get('height', int(576 * width/720.)) # assuming PAL :-/
         framerate = props.get('framerate', (25, 2))
-        framerate_float = float(framerate[0]) / framerate[1]
+        fr = "%d/%d" % (framerate[0], framerate[1])
         freq = props.get('frequency')
         pids = props.get('pids')
         template = ('%s freq=%(freq)d pids=%(pids)s'
@@ -86,6 +86,6 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' ! @feeder::audio@'
                     % (dvbsrc_template, 
                        dict(freq=freq, pids=pids, w=width, h=height,
-                           fr=('%d/%d' % (framerate[0], framerate[1])))))
+                           fr=fr)))
 
         return template
