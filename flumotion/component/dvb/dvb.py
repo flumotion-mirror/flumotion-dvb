@@ -72,25 +72,25 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         if "width" in props and "height" in props:
             width = props.get('width')
             height = props.get('height')
-            scaling_template = '''
-videoscale ! video/x-raw-yuv,width=%d, height=%d''' % (width, height)
+            scaling_template = ('videoscale ! '
+                                'video/x-raw-yuv,width=%d, height=%d !' % (
+                                    width, height))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
         freq = props.get('frequency')
         pids = props.get('pids')
         template = ('%(dvbsrc)s freq=%(freq)d pids=%(pids)s'
-                    ' ! flutsdemux name=demux es-pids=%(pids)s'
-                    '  demux. ! queue max-size-buffers=0 max-size-time=0 '
+                    ' ! tee name=t ! flutsdemux name=demux es-pids=%(pids)s'
+                    ' demux. ! queue max-size-buffers=0 max-size-time=0 '
                     ' ! video/mpeg ! mpeg2dec'
                     '    ! video/x-raw-yuv,format=(fourcc)I420'
-                    '    ! %(scaling)s'
-                    '    ! videorate'
+                    '    ! %(scaling)s videorate'
                     '    ! video/x-raw-yuv,framerate=%(fr)s'
                     '    ! @feeder::video@'
-                    '  demux. ! queue max-size-buffers=0 max-size-time=0'
-                    ' ! audio/mpeg ! mad'
-                    ' ! audiorate ! @feeder::audio@'
-                    % dict(freq=freq, pids=pids, w=width, h=height,
+                    ' demux. ! queue max-size-buffers=0 max-size-time=0'
+                    '    ! audio/mpeg ! mad ! audiorate ! @feeder::audio@'
+                    ' t. ! @feeder:mpegts@'
+                    % dict(freq=freq, pids=pids, 
                            fr=fr, dvbsrc=dvbsrc_template, 
                            scaling=scaling_template))
         return template
