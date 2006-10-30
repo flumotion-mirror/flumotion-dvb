@@ -52,7 +52,7 @@ class DVB(feedcomponent.ParseLaunchComponent):
             guard = props.get('guard')
             hierarchy = props.get('hierarchy')
             dvbsrc_template = '''
-dvbsrc modulation="QAM_%(modulation)d" trans-mode=%(trans_mode)dk
+dvbsrc modulation="QAM %(modulation)d" trans-mode=%(trans_mode)dk
 bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s 
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
 hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
@@ -84,9 +84,9 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' demux. ! queue max-size-buffers=0 max-size-time=0 '
                     ' ! video/mpeg ! mpeg2dec'
                     '    ! video/x-raw-yuv,format=(fourcc)I420'
-                    '    ! %(scaling)s videorate'
+                    '    ! videorate'
                     '    ! video/x-raw-yuv,framerate=%(fr)s'
-                    '    ! @feeder::video@'
+                    '    ! %(scaling)s @feeder::video@'
                     ' demux. ! queue max-size-buffers=0 max-size-time=0'
                     '    ! audio/mpeg ! mad ! audiorate ! @feeder::audio@'
                     ' t. ! @feeder::mpegts@'
