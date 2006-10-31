@@ -1,3 +1,8 @@
+2006-10-31  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py:
+	Log the dvb card's frontend stats.
+
 2006-10-30  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py:
