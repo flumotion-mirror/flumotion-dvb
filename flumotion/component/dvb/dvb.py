@@ -94,3 +94,19 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                            fr=fr, dvbsrc=dvbsrc_template, 
                            scaling=scaling_template))
         return template
+
+    def configure_pipeline(self, pipeline, properties):
+        bus = pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect('message::element', self._bus_message_received_cb)
+
+    def _bus_message_received_cb(self, bus, message):
+        """
+        @param bus: the message bus sending the message
+        @param message: the message received
+        """
+        if message.structure.get_name() == 'dvb-frontend-stats':
+            # we have frontend stats, lets log
+            s = message.structure
+            self.log("DVB Stats: signal: 0x%x snr: 0x%x ber: 0x%x unc: 0x%x lock: %d",
+                s["signal"], s["snr"], s["ber"], s["unc"], s["lock"])
