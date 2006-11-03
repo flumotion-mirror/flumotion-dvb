@@ -1,5 +1,10 @@
 2006-11-03  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
+	* conf/dvb-t.xml:
+	Add sample flow for DVB-T, this gives TV3 in Barcelona.
+
+2006-11-03  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
 	* flumotion/component/dvb/dvb.py:
 	* flumotion/component/dvb/dvb.xml:
 	Add option to get a transport stream from file.
