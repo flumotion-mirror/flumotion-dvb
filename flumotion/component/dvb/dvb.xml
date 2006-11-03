@@ -14,6 +14,7 @@
       <synchronization required="yes" clock-priority="160"/>
 
       <properties>
+        <!-- S, T or FILE -->
         <property name="dvb-type" type="string" required="true" />
 	<property name="frequency" type="int" required="true" />
 	<property name="pids" type="string" required="true" />
@@ -29,6 +30,8 @@
 	<property name="polarity" type="string" />
 	<property name="symbol-rate" type="string" />
 	<property name="satellite-number" type="int" />	
+	<!-- File specific properties -->
+	<property name="filename" type="string" />
 	<!-- output properties -->
 	<property name="width" type="int" />
 	<property name="height" type="int" />
