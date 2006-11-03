@@ -67,6 +67,9 @@ hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
 dvbsrc pol=%(polarity)s srate=%(symbol_rate)s 
 diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
     sat=sat)
+        elif self.dvb_type == "FILE":
+            filename = props.get('filename')
+            dvbsrc_template = '''filesrc location=%s''' % filename
         # we only want to scale if specifically told to in config
         scaling_template = ""
         if "width" in props and "height" in props:
