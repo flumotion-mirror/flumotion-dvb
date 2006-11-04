@@ -32,12 +32,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %makeinstall
 
-%find_lang flumotion-template
+%find_lang flumotion-dvb
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f flumotion-template.lang
+%files -f flumotion-dvb.lang
 %defattr(-,root,root,-)
 %doc ChangeLog COPYING README AUTHORS LICENSE.Flumotion LICENSE.GPL
 %{_libdir}/flumotion
