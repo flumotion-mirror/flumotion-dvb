@@ -32,9 +32,12 @@ class DVB(feedcomponent.ParseLaunchComponent):
             msg = "Property dvb-type can only be T (for DVB-T) or S (for DVB-S)."
             return defer.fail(errors.ConfigError(msg))
         # check if the required DVB parameters are passed
-        dvb_required_parameters = { "T": ["modulation", "trans-mode", 
-            "bandwidth", "code-rate-lp", "code-rate-hp", "guard", "hierarchy"],
-            "S": ["polarity", "symbol-rate", "satellite-number"] }
+        dvb_required_parameters = {
+            "T": ["modulation", "trans-mode", 
+                "bandwidth", "code-rate-lp", "code-rate-hp", "guard",
+                "hierarchy"],
+            "S": ["polarity", "symbol-rate", "satellite-number"]
+        }
         for param in dvb_required_parameters[dvb_type]:
             if not param in props:
                 msg = "DVB-%s mode is missing property '%s'." % (dvb_type, 

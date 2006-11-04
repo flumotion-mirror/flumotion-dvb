@@ -6,8 +6,6 @@ CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = 				\
 	__init__.py			\
-	common.py			\
-	test_sample_admin_gtk.py	\
-	test_sample_common.py
+	common.py
 
 check-local: trial
