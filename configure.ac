@@ -6,7 +6,6 @@ AC_SUBST(RELEASE, $FT_RELEASE)
 AC_SUBST_FILE(AUTHORS)
 AUTHORS=$srcdir/AUTHORS
 
-AC_SUBST(PYGTK_REQ, 2.4.0)
 AC_SUBST(FLU_REQ, 0.3.0)
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
@@ -38,40 +37,6 @@ dnl check for python
 AS_PATH_PYTHON(2.3)
 dnl useful when we compile our own python modules
 dnl AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
-
-dnl check for pygtk
-PKG_CHECK_MODULES(PYGTK, pygtk-2.0 >= $PYGTK_REQ)
-PYGTK_DIR="`$PKG_CONFIG --variable=pyexecdir pygtk-2.0`"
-AC_SUBST(PYGTK_DIR)
-AC_MSG_NOTICE(Using pygtk installed in $PYGTK_DIR)
-PYGTK_VERSION="`$PKG_CONFIG --modversion pygtk-2.0`"
-if test "x$PYGTK_VERSION" = "x2.5.2"
-then
-  AC_MSG_ERROR([PyGTK 2.5.2 contains known bugs, please install other version])
-fi
-
-export PYTHONPATH=$PYGTK_DIR:$PYTHONPATH
-
-dnl check for libglade
-AC_MSG_CHECKING(for gtk.glade)
-prog="
-import sys
-try:
-  import gtk.glade
-except RuntimeError:
-  sys.exit(0)
-except ImportError:
-  sys.exit(1)
-sys.exit(0)
-"
-
-if $PYTHON -c "$prog" 1>&AC_FD_CC 2>&AC_FD_CC
-then
-  AC_MSG_RESULT(found)
-else
-  AC_MSG_RESULT(not found)
-  AC_MSG_ERROR([You need to have python libglade bindings installed])
-fi
 
 dnl check for epydoc
 AC_CHECK_PROG(EPYDOC, epydoc, yes, no)
