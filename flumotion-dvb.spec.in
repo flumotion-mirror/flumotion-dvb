@@ -1,7 +1,7 @@
 Name:           @PACKAGE@
 Version:        @VERSION@
 Release:        @RELEASE@
-Summary:        Flumotion Template.
+Summary:        Flumotion DVB support
 
 Group:          Applications/Internet
 License:	GPL
@@ -14,10 +14,10 @@ Requires:	flumotion > 0.1.6
 BuildRequires:	gettext
 BuildRequires:	python >= 2.3
 #BuildRequires:	epydoc
-BuildArch:	noarch
+BuildRequires:  flumotion
 
 %description
-Flumotion Template.
+Flumotion DVB support.
 
 %prep
 %setup -q
@@ -43,5 +43,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/flumotion
 
 %changelog
-* Wed Apr 20 2005 Thomas Vander Stichele <thomas at apestaart dot org>
+* Sun Nov 05 2006 Thomas Vander Stichele <thomas at apestaart dot org>
 - first spec
