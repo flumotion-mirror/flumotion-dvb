@@ -1,3 +1,16 @@
+2006-11-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* Makefile.am:
+	* flumotion/component/dvb/dvb.py:
+	* flumotion/test/Makefile.am:
+	* flumotion/test/test_sample_admin_gtk.py:
+	* flumotion/test/test_sample_common.py:
+	* po/Makevars:
+	* po/POTFILES.in:
+	* po/fr.po:
+	* po/nl.po:
+	  fix up bits and pass make distcheck
+
 2006-11-03  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* conf/dvb-t.xml:

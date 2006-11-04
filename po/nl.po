@@ -14,18 +14,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: flumotion/component/sample/sample.glade:7
-msgid "Sample"
-msgstr "Voorbeeld"
+#~ msgid "Sample"
+#~ msgstr "Voorbeeld"
 
-#: flumotion/component/sample/sample.glade:33
-msgid "Flip h_orizontally"
-msgstr "H_orizontaal spiegelen"
+#~ msgid "Flip h_orizontally"
+#~ msgstr "H_orizontaal spiegelen"
 
-#: flumotion/component/sample/sample.glade:57
-msgid "Flip _vertically"
-msgstr "_Verticaal spiegelen"
+#~ msgid "Flip _vertically"
+#~ msgstr "_Verticaal spiegelen"
 
-#: flumotion/component/sample/admin_gtk.py:100
-msgid "Flipping"
-msgstr "Spiegelen"
+#~ msgid "Flipping"
+#~ msgstr "Spiegelen"
