@@ -1,0 +1,4 @@
+- run without flutsdemux, and fix it so that
+  - manager gets something better than a CopiedFailure to display
+  - after that, actually check for flutsdemux element in the component
+  - throw a nice error
