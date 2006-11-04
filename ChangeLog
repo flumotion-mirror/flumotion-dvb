@@ -1,5 +1,10 @@
 2006-11-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* configure.ac:
+	  remove pygtk dep
+
+2006-11-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* Makefile.am:
 	* flumotion/component/dvb/dvb.py:
 	* flumotion/test/Makefile.am:
