@@ -13,9 +13,9 @@ clean-local: locale-uninstalled-clean
 EXTRA_DIST = \
 	LICENSE.GPL \
 	LICENSE.Flumotion \
-	flumotion-template.spec
+	flumotion-dvb.spec
 
-PYCHECKER_WHITELIST = flumotion/component/sample/*.py
+PYCHECKER_WHITELIST = flumotion/component/dvb/*.py
 PYCHECKER_BLACKLIST =
 
-COVERAGE_MODULES = flumotion.component.sample
+COVERAGE_MODULES = flumotion.component.dvb

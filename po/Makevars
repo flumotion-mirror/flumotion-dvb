@@ -3,7 +3,7 @@
 # Usually the message domain is the same as the package name.
 DOMAIN = $(GETTEXT_PACKAGE)
 # thomas: can't override this from configure.ac, so ...
-DOMAIN = flumotion-template
+DOMAIN = flumotion-dvb
 
 # These two variables depend on the location of this directory.
 subdir = po
