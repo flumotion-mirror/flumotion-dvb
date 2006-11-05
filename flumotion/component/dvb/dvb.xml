@@ -18,6 +18,8 @@
         <property name="dvb-type" type="string" required="true" />
 	<property name="frequency" type="int" required="true" />
 	<property name="pids" type="string" required="true" />
+    <!-- S, T -->
+    <property name="device" type="string" required="false" />
 	<!-- DVB-T specific properties -->
         <property name="modulation" type="int" />
         <property name="trans-mode" type="int" />

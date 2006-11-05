@@ -35,8 +35,9 @@ class DVB(feedcomponent.ParseLaunchComponent):
         dvb_required_parameters = {
             "T": ["modulation", "trans-mode", 
                 "bandwidth", "code-rate-lp", "code-rate-hp", "guard",
-                "hierarchy"],
-            "S": ["polarity", "symbol-rate", "satellite-number"]
+                "hierarchy", "device"],
+            "S": ["polarity", "symbol-rate", "satellite-number", "device"],
+            "FILE":  ["filename"]
         }
         for param in dvb_required_parameters[dvb_type]:
             if not param in props:
@@ -54,22 +55,25 @@ class DVB(feedcomponent.ParseLaunchComponent):
             code_rate_hp = props.get('code-rate-hp')
             guard = props.get('guard')
             hierarchy = props.get('hierarchy')
+            device = props.get('device', '/dev/dvb/adapter0')
             dvbsrc_template = '''
-dvbsrc modulation="QAM %(modulation)d" trans-mode=%(trans_mode)dk
+dvbsrc device=%(device)s modulation="QAM %(modulation)d" 
+trans-mode=%(trans_mode)dk
 bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s 
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
 hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
                 bandwidth=bandwidth, code_rate_lp=code_rate_lp,
                 code_rate_hp="%d/%d" % (code_rate_hp[0], code_rate_hp[1]),
-                guard=guard, hierarchy=hierarchy)
+                guard=guard, hierarchy=hierarchy, device=device)
         elif self.dvb_type == "S":
             polarity = props.get('polarity')
             symbol_rate = props.get('symbol-rate')
             sat = props.get('satellite-number')
+            device = props.get('device', '/dev/dvb/adapter0')
             dvbsrc_template = '''
-dvbsrc pol=%(polarity)s srate=%(symbol_rate)s 
+dvbsrc device=%(device)s pol=%(polarity)s srate=%(symbol_rate)s
 diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
-    sat=sat)
+    sat=sat, device=device)
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
             dvbsrc_template = '''filesrc location=%s''' % filename
