@@ -82,9 +82,11 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         if "width" in props and "height" in props:
             width = props.get('width')
             height = props.get('height')
+            par = props.get('pixel-aspect-ratio', (1,1))
             scaling_template = ('videoscale method=1 ! '
-                                'video/x-raw-yuv,width=%d, height=%d !' % (
-                                    width, height))
+                                'video/x-raw-yuv,width=%d, height=%d, '
+                                'pixel-aspect-ratio=%d/%d !' % (
+                                    width, height, par[0], par[1]))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
         freq = props.get('frequency')
