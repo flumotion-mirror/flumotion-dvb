@@ -35,8 +35,8 @@ class DVB(feedcomponent.ParseLaunchComponent):
         dvb_required_parameters = {
             "T": ["modulation", "trans-mode", 
                 "bandwidth", "code-rate-lp", "code-rate-hp", "guard",
-                "hierarchy", "device"],
-            "S": ["polarity", "symbol-rate", "satellite-number", "device"],
+                "hierarchy"],
+            "S": ["polarity", "symbol-rate", "satellite-number"],
             "FILE":  ["filename"]
         }
         for param in dvb_required_parameters[dvb_type]:

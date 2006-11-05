@@ -1,6 +1,11 @@
 2006-11-05  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py:
+	Device has a default, don't require it for S and T.
+
+2006-11-05  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py:
 	* flumotion/component/dvb/dvb.xml:
 	Add pixel-aspect-ratio property.
 
