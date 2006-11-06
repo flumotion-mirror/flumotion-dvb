@@ -28,15 +28,15 @@ class DVB(feedcomponent.ParseLaunchComponent):
     def do_check(self):
         props = self.config['properties']
         dvb_type = self.dvb_type = props.get('dvb-type')
-        if dvb_type != 'T' and dvb_type != 'S':
+        if dvb_type != 'T' and dvb_type != 'S' and dvb_type != 'FILE':
             msg = "Property dvb-type can only be T (for DVB-T) or S (for DVB-S)."
             return defer.fail(errors.ConfigError(msg))
         # check if the required DVB parameters are passed
         dvb_required_parameters = {
             "T": ["modulation", "trans-mode", 
                 "bandwidth", "code-rate-lp", "code-rate-hp", "guard",
-                "hierarchy"],
-            "S": ["polarity", "symbol-rate", "satellite-number"],
+                "hierarchy", "frequency"],
+            "S": ["polarity", "symbol-rate", "satellite-number", "frequency"],
             "FILE":  ["filename"]
         }
         for param in dvb_required_parameters[dvb_type]:
@@ -89,22 +89,30 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                                     width, height, par[0], par[1]))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
-        freq = props.get('frequency')
         pids = props.get('pids')
-        template = ('%(dvbsrc)s freq=%(freq)d pids=%(pids)s'
+        idsync_template = ""
+        if self.dvb_type == "S" or self.dvb_type == "T":
+            freq = props.get('frequency')
+            dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
+                freq, pids)
+        elif self.dvb_type == "FILE":
+            idsync_template = "identity sync=true !"
+        template = ('%(dvbsrc)s'
                     ' ! tee name=t ! flutsdemux name=demux es-pids=%(pids)s'
                     ' demux. ! queue max-size-buffers=0 max-size-time=0 '
                     ' ! video/mpeg ! mpeg2dec'
-                    '    ! video/x-raw-yuv,format=(fourcc)I420'
+                    '    ! video/x-raw-yuv'
                     '    ! videorate'
                     '    ! video/x-raw-yuv,framerate=%(fr)s'
-                    '    ! %(scaling)s @feeder::video@'
+                    '    ! %(scaling)s %(identity)s @feeder::video@'
                     ' demux. ! queue max-size-buffers=0 max-size-time=0'
-                    '    ! audio/mpeg ! mad ! audiorate ! @feeder::audio@'
+                    '    ! audio/mpeg ! mad ! audiorate ! %(identity)s '
+                    ' @feeder::audio@'
                     ' t. ! @feeder::mpegts@'
-                    % dict(freq=freq, pids=pids, 
+                    % dict(pids=pids, 
                            fr=fr, dvbsrc=dvbsrc_template, 
-                           scaling=scaling_template))
+                           scaling=scaling_template,
+                           identity=idsync_template))
         return template
 
     def configure_pipeline(self, pipeline, properties):

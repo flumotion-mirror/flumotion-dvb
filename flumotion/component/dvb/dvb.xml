@@ -16,7 +16,7 @@
       <properties>
         <!-- S, T or FILE -->
         <property name="dvb-type" type="string" required="true" />
-	<property name="frequency" type="int" required="true" />
+	<property name="frequency" type="int" required="false" />
 	<property name="pids" type="string" required="true" />
     <!-- S, T -->
     <property name="device" type="string" required="false" />
