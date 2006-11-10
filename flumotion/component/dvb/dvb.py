@@ -23,6 +23,10 @@ from flumotion.component import feedcomponent
 from flumotion.common import errors
 from twisted.internet import defer
 
+from flumotion.common import messages
+from flumotion.common.messages import N_
+T_ = messages.gettexter('flumotion')
+
 class DVB(feedcomponent.ParseLaunchComponent):
     
     def do_check(self):
@@ -41,8 +45,10 @@ class DVB(feedcomponent.ParseLaunchComponent):
         }
         for param in dvb_required_parameters[dvb_type]:
             if not param in props:
-                msg = "DVB-%s mode is missing property '%s'." % (dvb_type, 
-                    param)
+                msg = T_(N_(
+                    "To use DVB-%s mode, you need to specify "
+                    "property '%s'." % (
+                    dvb_type, param)))
                 return defer.fail(errors.ConfigError(msg))
 
     def get_pipeline_string(self, props):
@@ -76,7 +82,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
     sat=sat, device=device)
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
-            dvbsrc_template = '''filesrc location=%s''' % filename
+            dvbsrc_template = 'filesrc location=%s ! video/mpegts' % filename
         # we only want to scale if specifically told to in config
         scaling_template = ""
         if "width" in props and "height" in props:
@@ -96,7 +102,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
                 freq, pids)
         elif self.dvb_type == "FILE":
-            idsync_template = "identity sync=true !"
+            idsync_template = "identity sync=true silent=true !"
         template = ('%(dvbsrc)s'
                     ' ! tee name=t ! flutsdemux name=demux es-pids=%(pids)s'
                     ' demux. ! queue max-size-buffers=0 max-size-time=0 '
@@ -108,7 +114,8 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' demux. ! queue max-size-buffers=0 max-size-time=0'
                     '    ! audio/mpeg ! mad ! audiorate ! %(identity)s '
                     ' @feeder::audio@'
-                    ' t. ! @feeder::mpegts@'
+                    ' t. ! queue max-size-buffers=0 max-size-time=0 !'
+                    ' @feeder::mpegts@'
                     % dict(pids=pids, 
                            fr=fr, dvbsrc=dvbsrc_template, 
                            scaling=scaling_template,
