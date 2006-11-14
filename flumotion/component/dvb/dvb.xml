@@ -18,6 +18,7 @@
         <property name="dvb-type" type="string" required="true" />
 	<property name="frequency" type="int" required="false" />
 	<property name="pids" type="string" required="true" />
+	<property name="program-number" type="int" />
     <!-- S, T -->
     <property name="device" type="string" required="false" />
 	<!-- DVB-T specific properties -->
