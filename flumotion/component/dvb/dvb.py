@@ -126,6 +126,8 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         bus = pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message::element', self._bus_message_received_cb)
+        pipeline.connect("deep-notify::pat-info", self.pat_info_cb)
+        pipeline.connect("deep-notify::pmt-info", self.pmt_info_cb)
 
     def _bus_message_received_cb(self, bus, message):
         """
@@ -137,3 +139,22 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             s = message.structure
             self.log("DVB Stats: signal: 0x%x snr: 0x%x ber: 0x%x unc: 0x%x lock: %d",
                 s["signal"], s["snr"], s["ber"], s["unc"], s["lock"])
+
+    def pat_info_cb(self, sender, demux, param):
+        self.debug("PAT info received from: %s", demux.get_name())
+        pi = demux.get_property("pat-info")
+        for prog in pi:
+            self.debug("PAT: Program %d on PID 0x%04x",
+                prog.props.program_number,prog.props.pid)
+        self.debug("PAT parsing finished")
+
+    def pmt_info_cb(self, sender, demux, param):
+        pi = demux.get_property("pmt-info")
+        self.debug("PMT info for program: %d with version: %d", 
+            pi.props.program_number, pi.props.version_number)
+        self.debug("PMT: PCR on PID 0x%04x", pi.props.pcr_pid)
+        for s in pi.props.stream_info:
+            self.debug("PMT: Stream on PID 0x%04x", s.props.pid)
+            for l in s.props.languages:
+                self.debug("PMT: Language %s", l)
+
