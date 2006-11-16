@@ -88,11 +88,19 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         if "width" in props and "height" in props:
             width = props.get('width')
             height = props.get('height')
+            scaled_width = props.get('scaled-width', width)
+            if height > 288:
+                interlaced_height = 576
+            else:
+                interlaced_height = 288
             par = props.get('pixel-aspect-ratio', (1,1))
             scaling_template = ('videoscale method=1 ! '
-                                'video/x-raw-yuv,width=%d, height=%d, '
-                                'pixel-aspect-ratio=%d/%d !' % (
-                                    width, height, par[0], par[1]))
+                'video/x-raw-yuv,width=%(sw)s,height=%(ih)s%(sq)s !'
+                'videoscale method=1 !'
+                'video/x-raw-yuv,width=%(sw)s,height=%(h)s%(sq)s, !'
+                'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
+                    sw=scaled_width, ih=interlaced_height, 
+                    h=height, par_n=par[0], par_d=par[1]))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
         pids = props.get('pids')
