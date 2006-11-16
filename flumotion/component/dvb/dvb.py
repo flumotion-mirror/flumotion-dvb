@@ -112,7 +112,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         elif self.dvb_type == "FILE":
             idsync_template = "identity sync=true silent=true !"
         template = ('%(dvbsrc)s'
-                    ' ! tee name=t ! flutsdemux name=demux es-pids=%(pids)s'
+                    ' ! tee name=t ! flutsdemux name=demux'
                     ' demux. ! queue max-size-buffers=0 max-size-time=0 '
                     ' ! video/mpeg ! mpeg2dec'
                     '    ! video/x-raw-yuv'
