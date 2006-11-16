@@ -97,7 +97,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             scaling_template = ('videoscale method=1 ! '
                 'video/x-raw-yuv,width=%(sw)s,height=%(ih)s !'
                 'videoscale method=1 !'
-                'video/x-raw-yuv,width=%(sw)s,height=%(h)s, !'
+                'video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
                 'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
                     sw=scaled_width, ih=interlaced_height, 
                     h=height, par_n=par[0], par_d=par[1]))
