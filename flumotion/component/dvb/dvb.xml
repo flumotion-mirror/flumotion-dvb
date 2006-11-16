@@ -19,11 +19,11 @@
 	<property name="frequency" type="int" required="false" />
 	<property name="pids" type="string" required="true" />
 	<property name="program-number" type="int" />
-    <!-- S, T -->
-    <property name="device" type="string" required="false" />
+	<!-- S, T -->
+	<property name="device" type="string" required="false" />
 	<!-- DVB-T specific properties -->
-        <property name="modulation" type="int" />
-        <property name="trans-mode" type="int" />
+	<property name="modulation" type="int" />
+	<property name="trans-mode" type="int" />
         <property name="bandwidth" type="int" />
         <property name="code-rate-lp" type="string" />
 	<property name="code-rate-hp" type="fraction" />
@@ -38,8 +38,9 @@
 	<!-- output properties -->
 	<property name="width" type="int" />
 	<property name="height" type="int" />
+	<property name="scaled-width" type="int" />
 	<property name="framerate" type="fraction" />
-    <property name="pixel-aspect-ratio" type="fraction" />
+	<property name="pixel-aspect-ratio" type="fraction" />
       </properties>
     </component>
   </components>
