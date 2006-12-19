@@ -1,6 +1,6 @@
 <registry>
   <components>
-    <component type="dvb"
+    <component type="dvb-producer"
                base="flumotion/component/dvb">
       <source location="flumotion.component.dvb.dvb" />
       <feeder name="audio" />
