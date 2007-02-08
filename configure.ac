@@ -1,6 +1,6 @@
 AC_INIT(README)
 
-AS_VERSION(flumotion-dvb, FT, 0, 3, 1, 0)
+AS_VERSION(flumotion-dvb, FT, 0, 3, 1, 1)
 AC_SUBST(RELEASE, $FT_RELEASE)
 
 AC_SUBST_FILE(AUTHORS)
