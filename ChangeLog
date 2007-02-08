@@ -1,3 +1,15 @@
+=== release 0.3.1 ===
+
+2007-02-08  Michael Smith  <msmith@fluendo.com>
+
+	* Makefile.am:
+	* env
+	* configure.ac:
+	* flumotion-dvb.spec.in:
+	* po/fr.po:
+	* po/nl.po:
+	  To 0.3.1
+
 2006-12-19  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.xml:
