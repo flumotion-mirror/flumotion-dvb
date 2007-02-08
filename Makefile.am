@@ -11,6 +11,7 @@ all-local: locale-uninstalled
 clean-local: locale-uninstalled-clean
 
 EXTRA_DIST = \
+	env \
 	LICENSE.GPL \
 	LICENSE.Flumotion \
 	flumotion-dvb.spec
