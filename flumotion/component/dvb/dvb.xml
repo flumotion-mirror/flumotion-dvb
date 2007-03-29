@@ -19,6 +19,12 @@
 	<property name="frequency" type="int" required="false" />
 	<property name="pids" type="string" required="true" />
 	<property name="program-number" type="int" />
+	<property name="has-video" type="bool" required="false" />
+	<property name="video-decoder" type="string" required="false" />
+	<property name="audio-decoder" type="string" required="false" />
+	<!-- audio pid: optional argument used to identify the audio
+	     pid that we want to use, in the case there may be many -->
+	<property name="audio-pid" type="int" required="false" />
 	<!-- S, T -->
 	<property name="device" type="string" required="false" />
 	<!-- DVB-T specific properties -->

@@ -83,6 +83,9 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
             dvbsrc_template = 'filesrc location=%s ! video/mpegts' % filename
+        has_video = props.get('has-video', True)
+        video_decoder = props.get('video-decoder', 'mpeg2dec')
+        audio_decoder = props.get('audio-decoder', 'mad')
         # we only want to scale if specifically told to in config
         scaling_template = ""
         if "width" in props and "height" in props:
@@ -95,15 +98,16 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                 interlaced_height = 288
             par = props.get('pixel-aspect-ratio', (1,1))
             scaling_template = ('videoscale method=1 ! '
-                'video/x-raw-yuv,width=%(sw)s,height=%(ih)s !'
-                'videoscale method=1 !'
-                'video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
+                ' video/x-raw-yuv,width=%(sw)s,height=%(ih)s !'
+                ' videoscale method=1 !'
+                ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
                 'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
                     sw=scaled_width, ih=interlaced_height, 
                     h=height, par_n=par[0], par_d=par[1]))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
         pids = props.get('pids')
+        audio_pid = props.get('audio-pid', 0)
         idsync_template = ""
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
@@ -111,23 +115,32 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                 freq, pids)
         elif self.dvb_type == "FILE":
             idsync_template = "identity sync=true silent=true !"
+        audio_pid_template = ""
+        if audio_pid > 0:
+            # transport stream demuxer expects this as 4 digit hex
+            audio_pid_template = "audio_%04x " % audio_pid
         template = ('%(dvbsrc)s'
                     ' ! tee name=t ! flutsdemux name=demux'
-                    ' demux. ! queue max-size-buffers=0 max-size-time=0 '
-                    ' ! video/mpeg ! mpeg2dec'
-                    '    ! video/x-raw-yuv'
-                    '    ! videorate'
-                    '    ! video/x-raw-yuv,framerate=%(fr)s'
-                    '    ! %(scaling)s %(identity)s @feeder::video@'
-                    ' demux. ! queue max-size-buffers=0 max-size-time=0'
-                    '    ! audio/mpeg ! mad ! audiorate ! %(identity)s '
+                    ' demux.%(audiopid)s ! '
+                    ' queue max-size-buffers=0 max-size-time=0'
+                    ' ! %(audiodec)s ! audiorate ! %(identity)s '
                     ' @feeder::audio@'
                     ' t. ! queue max-size-buffers=0 max-size-time=0 !'
                     ' @feeder::mpegts@'
-                    % dict(pids=pids, 
-                           fr=fr, dvbsrc=dvbsrc_template, 
-                           scaling=scaling_template,
+                    % dict(pids=pids, audiopid=audio_pid_template, 
+                           dvbsrc=dvbsrc_template, audiodec=audio_decoder,
                            identity=idsync_template))
+        if has_video:
+            template = ('%(template)s demux. ! '
+                        ' queue max-size-buffers=0 max-size-time=0 '
+                        ' ! %(videodec)s '
+                        '    ! video/x-raw-yuv'
+                        '    ! videorate'
+                        '    ! video/x-raw-yuv,framerate=%(fr)s'
+                        '    ! %(scaling)s %(identity)s @feeder::video@'
+                        % dict(template=template, scaling=scaling_template,
+                               identity=idsync_template, 
+                               videodec=video_decoder, fr=fr))
         return template
 
     def configure_pipeline(self, pipeline, properties):
@@ -145,7 +158,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         if message.structure.get_name() == 'dvb-frontend-stats':
             # we have frontend stats, lets log
             s = message.structure
-            self.log("DVB Stats: signal: 0x%x snr: 0x%x ber: 0x%x unc: 0x%x lock: %d",
+            self.debug("DVB Stats: signal: 0x%x snr: 0x%x ber: 0x%x unc: 0x%x lock: %d",
                 s["signal"], s["snr"], s["ber"], s["unc"], s["lock"])
 
     def pat_info_cb(self, sender, demux, param):
@@ -165,4 +178,3 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             self.debug("PMT: Stream on PID 0x%04x", s.props.pid)
             for l in s.props.languages:
                 self.debug("PMT: Language %s", l)
-
