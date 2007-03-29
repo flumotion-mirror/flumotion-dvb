@@ -1,3 +1,10 @@
+2007-03-29  Zaheer Abbas Merali  <<zaheerabbas at merali dot org>>
+
+	* flumotion/component/dvb/dvb.py (DVB.get_pipeline_string):
+	Stupid flumotion complains if a feeder is not in the template,
+	so if there is no video just tee the ts to the dummy video
+	feeder.
+
 2007-03-29  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py (DVB.get_pipeline_string,

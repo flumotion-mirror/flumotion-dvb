@@ -141,6 +141,8 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                         % dict(template=template, scaling=scaling_template,
                                identity=idsync_template, 
                                videodec=video_decoder, fr=fr))
+        else:
+            template = '%s t. ! @feeder::video@' % template
         return template
 
     def configure_pipeline(self, pipeline, properties):
