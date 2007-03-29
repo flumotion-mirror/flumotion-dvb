@@ -1,3 +1,12 @@
+2007-03-29  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py (DVB.get_pipeline_string,
+	  _bus_message_received_cb):
+	* flumotion/component/dvb/dvb.xml:
+	Add new options: has-video, video-decoder and audio-decoder.
+	Make sure dvb stats are logged in debug level.
+	Allow audio-only dvb.
+
 2007-02-12  Thomas Vander Stichele  <thomas at apestaart dot org>
 
 	* configure.ac:
