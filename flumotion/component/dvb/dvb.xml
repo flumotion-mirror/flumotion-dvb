@@ -9,6 +9,8 @@
       <entries>
         <entry type="component" location="dvb.py"
                function="DVB" />
+	<entry type="admin/gtk" location="admin_gtk.py"
+               function="DVBAdminGtk" />
       </entries>
 
       <synchronization required="yes" clock-priority="160"/>
@@ -74,6 +76,13 @@
                <filename location="dvb.py" />
            </directory>
        </directories>
+    </bundle>
+    <bundle project="dvb" name="dvb-admin-gtk">
+       <dependencies>
+           <dependency name="dvb-base" />
+	   <dependency name="base-admin-gtk" />
+	   <dependency name="volume-admin-gtk" />
+       </dependencies>
     </bundle>
   </bundles>
 </registry> 
