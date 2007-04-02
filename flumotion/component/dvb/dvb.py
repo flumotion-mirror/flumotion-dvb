@@ -138,7 +138,8 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' demux.%(audiopid)s ! '
                     ' queue max-size-buffers=0 max-size-time=0'
                     ' ! %(audiodec)s ! audiorate ! %(identity)s '
-                    ' level name=level ! volume name=volume ! @feeder::audio@'
+                    ' audioconvert ! level name=level ! volume name=volume'
+                    ' ! @feeder::audio@'
                     ' t. ! queue max-size-buffers=0 max-size-time=0 !'
                     ' @feeder::mpegts@'
                     % dict(pids=pids, audiopid=audio_pid_template, 
@@ -201,3 +202,12 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             self.debug("PMT: Stream on PID 0x%04x", s.props.pid)
             for l in s.props.languages:
                 self.debug("PMT: Language %s", l)
+
+    def setVolume(self, value):
+        self.debug("Volume set to %d" % value)
+        element = self.get_element('volume')
+        element.set_property('volume', value)
+
+    def getVolume(self):
+        element = self.get_element('volume')
+        return element.get_property('volume')

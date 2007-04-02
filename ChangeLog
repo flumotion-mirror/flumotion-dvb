@@ -1,5 +1,21 @@
 2007-04-02  Zaheer Abbas Merali  <<zaheerabbas at merali dot org>>
 
+	* flumotion/component/dvb/Makefile.am:
+	* flumotion/component/dvb/admin_gtk.py (DVBAdminGtkNode,
+	  DVBAdminGtkNode.haveWidgetTree, DVBAdminGtkNode.setUIState,
+	  DVBAdminGtkNode.stateSet, DVBAdminGtkNode.wave_changed_cb,
+	  DVBAdminGtkNode.signalSet, DVBAdminGtkNode.snrSet,
+	  DVBAdminGtkNode.berSet, DVBAdminGtkNode.uncSet, DVBAdminGtk,
+	  DVBAdminGtk.setup):
+	* flumotion/component/dvb/dvb.glade:
+	* flumotion/component/dvb/dvb.py (DVB.get_pipeline_string, pmt_info_cb,
+	  setVolume, getVolume):
+	* flumotion/component/dvb/dvb.xml:
+	Add admin ui for dvb.  Also audioconvert needed between audiorate
+	and level because level doesn't handle 32 bit integers.
+
+2007-04-02  Zaheer Abbas Merali  <<zaheerabbas at merali dot org>>
+
 	* flumotion/component/dvb/dvb.py (DVB.get_pipeline_string,
 	  configure_pipeline):
 	Add volume effect to DVB.
