@@ -22,6 +22,7 @@
 from flumotion.component import feedcomponent
 from flumotion.common import errors
 from twisted.internet import defer
+from flumotion.component.effects.volume import volume
 
 from flumotion.common import messages
 from flumotion.common.messages import N_
@@ -137,7 +138,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' demux.%(audiopid)s ! '
                     ' queue max-size-buffers=0 max-size-time=0'
                     ' ! %(audiodec)s ! audiorate ! %(identity)s '
-                    ' @feeder::audio@'
+                    ' level name=level ! volume name=volume ! @feeder::audio@'
                     ' t. ! queue max-size-buffers=0 max-size-time=0 !'
                     ' @feeder::mpegts@'
                     % dict(pids=pids, audiopid=audio_pid_template, 
@@ -164,6 +165,10 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         bus.connect('message::element', self._bus_message_received_cb)
         pipeline.connect("deep-notify::pat-info", self.pat_info_cb)
         pipeline.connect("deep-notify::pmt-info", self.pmt_info_cb)
+        # add volume effect
+        level = pipeline.get_by_name('level')
+        vol = volume.Volume('volume', level, pipeline)
+        self.addEffect(vol)
 
     def _bus_message_received_cb(self, bus, message):
         """
