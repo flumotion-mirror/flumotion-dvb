@@ -27,8 +27,21 @@ from flumotion.common import messages
 from flumotion.common.messages import N_
 T_ = messages.gettexter('flumotion')
 
+# Statistics we get from DVB are:
+# signal: signal strength (0 - 65535)
+# snr: signal to noise ratio (0 - 65535)
+# ber: bit error rate (seems to be driver specific scale)
+# unc: uncorrected bits (should be cumulative but drivers do not follow spec)
+# lock: locked to signal (boolean)
 class DVB(feedcomponent.ParseLaunchComponent):
-    
+
+    def init(self):
+        self.uiState.addKey('signal', 0)
+        self.uiState.addKey('snr', 0)
+        self.uiState.addKey('ber', 0)
+        self.uiState.addKey('unc', 0)
+        self.uiState.addKey('lock', False)
+
     def do_check(self):
         props = self.config['properties']
         dvb_type = self.dvb_type = props.get('dvb-type')
@@ -158,10 +171,13 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         @param message: the message received
         """
         if message.structure.get_name() == 'dvb-frontend-stats':
-            # we have frontend stats, lets log
+            # we have frontend stats, lets update ui state
             s = message.structure
-            self.debug("DVB Stats: signal: 0x%x snr: 0x%x ber: 0x%x unc: 0x%x lock: %d",
-                s["signal"], s["snr"], s["ber"], s["unc"], s["lock"])
+            self.uiState.set('signal', s["signal"])
+            self.uiState.set('snr', s["snr"])
+            self.uiState.set('ber', s["ber"])
+            self.uiState.set('unc', s["unc"])
+            self.uiState.set('lock', s["lock"])
 
     def pat_info_cb(self, sender, demux, param):
         self.debug("PAT info received from: %s", demux.get_name())
