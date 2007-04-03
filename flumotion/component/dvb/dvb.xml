@@ -83,6 +83,13 @@
 	   <dependency name="base-admin-gtk" />
 	   <dependency name="volume-admin-gtk" />
        </dependencies>
+
+       <directories>
+           <directory name="flumotion/component/dvb">
+	       <filename location="admin_gtk.py" />
+	       <filename location="dvb.glade" />
+	   </directory>
+       </directories>
     </bundle>
   </bundles>
 </registry> 
