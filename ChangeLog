@@ -1,3 +1,12 @@
+2007-04-03  Zaheer Abbas Merali  <<zaheerabbas at merali dot org>>
+
+	* flumotion/component/dvb/admin_gtk.py (DVBAdminGtkNode.haveWidgetTree,
+	  DVBAdminGtkNode.signalSet, DVBAdminGtkNode.snrSet,
+	  DVBAdminGtkNode.berSet, DVBAdminGtkNode.uncSet, DVBAdminGtk,
+	  DVBAdminGtk.setup):
+	* flumotion/component/dvb/dvb.xml:
+	Fix gtk admin to actually work and get bundled.
+
 2007-04-02  Zaheer Abbas Merali  <<zaheerabbas at merali dot org>>
 
 	* flumotion/component/dvb/Makefile.am:
