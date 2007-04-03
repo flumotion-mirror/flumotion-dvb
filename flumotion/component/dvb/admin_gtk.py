@@ -34,7 +34,7 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
         self._signal = self.wtree.get_widget('value-signal')
         self._snr = self.wtree.get_widget('value-snr')
         self._ber = self.wtree.get_widget('value-ber')
-        self._ucb = self._scale.connect('value-unc')
+        self._unc = self.wtree.get_widget('value-unc')
 
     def setUIState(self, state):
         admin_gtk.BaseAdminGtkNode.setUIState(self, state)
@@ -58,26 +58,27 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
         
     def signalSet(self, signal):
     	if self._signal:
-            self._signal.set_text(signal)
+            self._signal.set_text(str(signal))
         
     def snrSet(self, snr):
     	if self._snr:
-            self._snr.set_text(snr)
+            self._snr.set_text(str(snr))
 
     def berSet(self, ber):
         if self._ber:
-            self._ber.set_text(ber)
+            self._ber.set_text(str(ber))
 
     def uncSet(self, unc):
         if self._unc:
-            self._unc.set_text(unc)
+            self._unc.set_text(str(unc))
 
 class DVBAdminGtk(admin_gtk.BaseAdminGtk):
     def setup(self):
+        dvbnode = DVBAdminGtkNode(self.state, self.admin,
+                                  title="DVB")
+        self.nodes['DVB'] = dvbnode
         volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
                                                'volume', title=_("Volume"))
         self.nodes['Volume'] = volume
-        audiotest = DVBAdminGtkNode(self.state, self.admin,
-                                          title="DVB")
-        self.nodes['DVB'] = audiotest
+
         return admin_gtk.BaseAdminGtk.setup(self)
