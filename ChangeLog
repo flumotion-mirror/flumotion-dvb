@@ -1,3 +1,5 @@
+== release 0.4.1 ==
+
 2007-04-05  Zaheer Abbas Merali  <<zaheerabbas at merali dot org>>
 
 	* flumotion/component/dvb/admin_gtk.py (DVBAdminGtkNode.haveWidgetTree,
