@@ -35,6 +35,7 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
         self._snr = self.wtree.get_widget('value-snr')
         self._ber = self.wtree.get_widget('value-ber')
         self._unc = self.wtree.get_widget('value-unc')
+        self._lock = self.wtree.get_widget('value-lock')
 
     def setUIState(self, state):
         admin_gtk.BaseAdminGtkNode.setUIState(self, state)
@@ -42,7 +43,8 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
             self.uiStateHandlers = {'signal': self.signalSet,
                                     'snr': self.snrSet,
                                     'ber': self.berSet,
-                				    'unc': self.uncSet}
+                				    'unc': self.uncSet,
+                                    'lock': self.lockSet }
         for k, handler in self.uiStateHandlers.items():
             handler(state.get(k))
                                     
@@ -71,6 +73,10 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
     def uncSet(self, unc):
         if self._unc:
             self._unc.set_text(str(unc))
+
+    def lockSet(self, locked):
+        if self._lock:
+            self._lock.set_text(str(locked))
 
 class DVBAdminGtk(admin_gtk.BaseAdminGtk):
     def setup(self):
