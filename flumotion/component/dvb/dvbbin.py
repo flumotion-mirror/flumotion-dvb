@@ -27,6 +27,8 @@ class DvbBin(gst.Bin):
     # This flag means that we will not receive new pads for this current
     # segment
     no_more_pads = False
+    
+    ghostpads = {}
 
     def __init__(self, tuning_params, program_number):
         gobject.GObject.__init__(self)
@@ -173,10 +175,15 @@ class DvbBin(gst.Bin):
     def _pad_blocked_cb(self, pad, blocked, padname):
         if blocked:
             identity_ghostpad = gst.GhostPad(padname, pad)
-            self.add_pad(identity_ghostpad)
+            self.debug("adding ghostpad")
             pad.set_blocked_async (False, self._pad_blocked_cb, padname)
+            self.ghostpads[padname] = identity_ghostpad
         else:
             self.debug("unblocked pad %s" % padname)
+            if padname in self.ghostpads:
+                self.ghostpads[padname].set_active(True)
+                self.add_pad(self.ghostpads[padname])
+                del self.ghostpads[padname]
 
     def _event_probe_cb(self, pad, event, padname):
         if event.type == gst.EVENT_EOS:
@@ -228,7 +235,7 @@ def dvb_pad_added(element, pad, dvbsrc, pipeline, what_we_have):
             what_we_have["video"] = True
             print "we do not have video, connecting fakesink"
             fakesink = gst.element_factory_make("fakesink")
-            fakesink.set_proprty("silent", True)
+            fakesink.set_property("silent", True)
             fakesink.set_property("sync", False)
             pipeline.add(fakesink)
             pad.link(fakesink.get_pad("sink"))
