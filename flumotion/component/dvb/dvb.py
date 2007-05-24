@@ -100,23 +100,27 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         has_video = props.get('has-video', True)
         video_decoder = props.get('video-decoder', 'mpeg2dec')
         audio_decoder = props.get('audio-decoder', 'mad')
+        deinterlacer = props.get('deinterlacer', None)
         # we only want to scale if specifically told to in config
         scaling_template = ""
-        if "width" in props and "height" in props:
-            width = props.get('width')
-            height = props.get('height')
+        deinterlacing_template = deinterlacer
+        width = props.get('width', None)
+        height = props.get('height', None)
+        if width and height:
             scaled_width = props.get('scaled-width', width)
-            if height > 288:
-                interlaced_height = 576
-            else:
-                interlaced_height = 288
+        if not deinterlacer:
+            interlaced_height = 288
+            deinterlacing_template = ('videoscale method=1 ! '
+                ' video/x-raw-yuv,width=%(sw)s,height=%(ih)s ' % dict(
+                sw=scaled_width, ih=interlaced_height))
+        else:
+            deinterlacing_template = deinterlacer
+        if "width" in props and "height" in props:
             par = props.get('pixel-aspect-ratio', (1,1))
-            scaling_template = ('videoscale method=1 ! '
-                ' video/x-raw-yuv,width=%(sw)s,height=%(ih)s !'
-                ' videoscale method=1 !'
+            scaling_template = ('videoscale method=1 !'
                 ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
                 'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
-                    sw=scaled_width, ih=interlaced_height, 
+                    sw=scaled_width, 
                     h=height, par_n=par[0], par_d=par[1]))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
@@ -152,8 +156,10 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                         '    ! video/x-raw-yuv'
                         '    ! videorate'
                         '    ! video/x-raw-yuv,framerate=%(fr)s'
+                        '    ! %(deinterlacing)s'
                         '    ! %(scaling)s %(identity)s @feeder::video@'
                         % dict(template=template, scaling=scaling_template,
+                               deinterlacing=deinterlacing_template,
                                identity=idsync_template, 
                                videodec=video_decoder, fr=fr))
         else:
