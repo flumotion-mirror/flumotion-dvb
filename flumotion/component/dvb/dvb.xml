@@ -49,6 +49,7 @@
 	<property name="scaled-width" type="int" />
 	<property name="framerate" type="fraction" />
 	<property name="pixel-aspect-ratio" type="fraction" />
+	<property name="deinterlacer" type="string" />
       </properties>
     </component>
   </components>
