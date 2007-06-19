@@ -106,6 +106,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         deinterlacing_template = deinterlacer
         width = props.get('width', None)
         height = props.get('height', None)
+        scaled_width = 720
         if width and height:
             scaled_width = props.get('scaled-width', width)
         if not deinterlacer:
