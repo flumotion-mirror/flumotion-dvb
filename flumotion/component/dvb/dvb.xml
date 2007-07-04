@@ -70,6 +70,7 @@
        <dependencies>
            <dependency name="component" />
            <dependency name="dvb-base" />
+           <dependency name="volume-effect" />
        </dependencies>
 
        <directories>
