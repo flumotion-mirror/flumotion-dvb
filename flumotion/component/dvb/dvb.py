@@ -23,7 +23,7 @@ from flumotion.component import feedcomponent
 from flumotion.common import errors
 from twisted.internet import defer
 from flumotion.component.effects.volume import volume
-
+import gst
 from flumotion.common import messages
 from flumotion.common.messages import N_
 T_ = messages.gettexter('flumotion')
@@ -42,7 +42,8 @@ class DVB(feedcomponent.ParseLaunchComponent):
         self.uiState.addKey('ber', 0)
         self.uiState.addKey('unc', 0)
         self.uiState.addKey('lock', False)
-
+        self._dvb_src_old = False
+    
     def do_check(self):
         props = self.config['properties']
         dvb_type = self.dvb_type = props.get('dvb-type')
@@ -64,6 +65,15 @@ class DVB(feedcomponent.ParseLaunchComponent):
                     "property '%s'." % (
                     dvb_type, param)))
                 return defer.fail(errors.ConfigError(msg))
+        dvb_element = gst.element_factory_make("dvbsrc")
+        if hasattr(dvb_element.props, "device"):
+            self._dvb_src_old = True
+
+        if self._dvb_src_old and props.get('frontend', 0) != 0:
+            msg = "You have an old dvbsrc element that cannot use a " \
+                "frontend apart from frontend 0. Please upgrade to " \
+                "a newer or CVS gst-plugins-bad."
+            return defer.fail(errors.ConfigError(msg))
 
     def get_pipeline_string(self, props):
         dvbsrc_template = ""
@@ -75,23 +85,22 @@ class DVB(feedcomponent.ParseLaunchComponent):
             code_rate_hp = props.get('code-rate-hp')
             guard = props.get('guard')
             hierarchy = props.get('hierarchy')
-            device = props.get('device', '/dev/dvb/adapter0')
             dvbsrc_template = '''
-dvbsrc device=%(device)s modulation="QAM %(modulation)d" 
+dvbsrc modulation="QAM %(modulation)d" 
 trans-mode=%(trans_mode)dk
 bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s 
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
 hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
                 bandwidth=bandwidth, code_rate_lp=code_rate_lp,
                 code_rate_hp="%d/%d" % (code_rate_hp[0], code_rate_hp[1]),
-                guard=guard, hierarchy=hierarchy, device=device)
+                guard=guard, hierarchy=hierarchy)
         elif self.dvb_type == "S":
             polarity = props.get('polarity')
             symbol_rate = props.get('symbol-rate')
             sat = props.get('satellite-number')
             device = props.get('device', '/dev/dvb/adapter0')
             dvbsrc_template = '''
-dvbsrc device=%(device)s pol=%(polarity)s srate=%(symbol_rate)s
+dvbsrc pol=%(polarity)s srate=%(symbol_rate)s
 diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
     sat=sat, device=device)
         elif self.dvb_type == "FILE":
@@ -117,12 +126,18 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         else:
             deinterlacing_template = deinterlacer
         if "width" in props and "height" in props:
-            par = props.get('pixel-aspect-ratio', (1,1))
-            scaling_template = ('videoscale method=1 !'
-                ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
-                'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
-                    sw=scaled_width, 
-                    h=height, par_n=par[0], par_d=par[1]))
+            par = props.get('pixel-aspect-ratio')
+            if par:
+                scaling_template = ('videoscale method=1 !'
+                    ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
+                    'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
+                        sw=scaled_width, 
+                        h=height, par_n=par[0], par_d=par[1]))
+            else:
+                scaling_template = ('videoscale method=1 !'
+                    'video/x-raw-yuv,width=%(sw)s,height=%(h)s !' % dict(
+                        sw=scaled_width,
+                        h=height))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
         pids = props.get('pids')
