@@ -1,5 +1,13 @@
 2007-07-30  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
+	* flumotion/component/dvb/dvb.py (DVB.init, DVB.do_check,
+	  DVB.get_pipeline_string):
+	Check for dvbsrc version and start of using new properties
+	when able.
+	Replace stupid par assignment.
+
+2007-07-30  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
 	* flumotion/component/dvb/dvb.xml:
 	dvb producer does not need to have such a high clock
 	priority so use the default clock priority.
