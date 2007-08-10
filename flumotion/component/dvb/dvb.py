@@ -142,13 +142,15 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         fr = "%d/%d" % (framerate[0], framerate[1])
         pids = props.get('pids')
         audio_pid = props.get('audio-pid', 0)
-        idsync_template = ""
+        # identity to check for imperfect timestamps also for
+        # use to sync to the clock when we use a file
+        idsync_template = "identity check-imperfect-timestamp silent=true"
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
             dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
                 freq, pids)
         elif self.dvb_type == "FILE":
-            idsync_template = "identity sync=true silent=true !"
+            idsync_template = "%s sync=true" % idsync_template
         audio_pid_template = ""
         if audio_pid > 0:
             # transport stream demuxer expects this as 4 digit hex
@@ -157,8 +159,9 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' ! tee name=t ! flutsdemux name=demux'
                     ' demux.%(audiopid)s ! '
                     ' queue max-size-buffers=0 max-size-time=0'
-                    ' ! %(audiodec)s ! audiorate ! %(identity)s '
-                    ' audioconvert ! level name=level ! volume name=volume'
+                    ' ! %(audiodec)s name=audiodecoder! audiorate'
+                    ' ! %(identity)s name=audioid'
+                    ' ! audioconvert ! level name=level ! volume name=volume'
                     ' ! @feeder::audio@'
                     ' t. ! queue max-size-buffers=0 max-size-time=0 !'
                     ' @feeder::mpegts@'
@@ -168,12 +171,12 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         if has_video:
             template = ('%(template)s demux. ! '
                         ' queue max-size-buffers=0 max-size-time=0 '
-                        ' ! %(videodec)s '
+                        ' ! %(videodec)s name=videodecoder'
                         '    ! video/x-raw-yuv'
                         '    ! videorate'
                         '    ! video/x-raw-yuv,framerate=%(fr)s'
                         '    ! %(deinterlacing)s'
-                        '    ! %(scaling)s %(identity)s @feeder::video@'
+                        '    ! %(scaling)s %(identity)s name=videoid ! @feeder::video@'
                         % dict(template=template, scaling=scaling_template,
                                deinterlacing=deinterlacing_template,
                                identity=idsync_template, 
@@ -192,6 +195,12 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
         self.addEffect(vol)
+        # attach pad monitors to make sure we know when there is no
+        # audio or video comming out
+        audiodecoder = pipeline.get_by_name('audiodecoder')
+        videodecoder = pipeline.get_by_name('videodecoder')
+        self.attachPadMonitor(audiodecoder.get_pad('src'), "audiodecoder")
+        self.attachPadMonitor(videodecoder.get_pad('src'), "videodecoder")
 
     def _bus_message_received_cb(self, bus, message):
         """
