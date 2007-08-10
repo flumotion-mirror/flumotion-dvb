@@ -1,3 +1,11 @@
+2007-08-10  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py (DVB.get_pipeline_string,
+	  configure_pipeline):
+	Always add an identity check-imperfect-timestamp after
+	decoders. Also add pad monitors to the src pads of the
+	decoders so we go hungry when there is no data.
+
 2007-07-30  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py (DVB.init, DVB.do_check,
