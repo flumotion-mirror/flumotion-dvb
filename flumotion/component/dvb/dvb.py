@@ -144,7 +144,7 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         audio_pid = props.get('audio-pid', 0)
         # identity to check for imperfect timestamps also for
         # use to sync to the clock when we use a file
-        idsync_template = "identity check-imperfect-timestamp silent=true"
+        idsync_template = "identity check-imperfect-timestamp=true silent=true"
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
             dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
@@ -215,6 +215,26 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             self.uiState.set('ber', s["ber"])
             self.uiState.set('unc', s["unc"])
             self.uiState.set('lock', s["lock"])
+        elif message.structure.get_name() == 'imperfect-timestamp':
+            identityName = message.src.get_name() 
+            self.log("we have an imperfect stream from %s",
+                identityName[:-2])
+            # figure out the discontinuity
+            s = message.structure
+            expectedTimestamp = s["prev-timestamp"] + s["prev-duration"]
+            message = None
+            if s["cur-timestamp"] > expectedTimestamp + 10 * gst.SECOND:
+                message = "We had a large ( > 10 second) difference in " \
+                    "timestamps with %s" % identityName[:-2]
+            elif s["cur-timestamp"] < s["prev-timestamp"]:
+                message = "We went backwards in timestamp with %s" % (
+                    identityName[:-2],)
+            if message:
+                m = messages.Warning(T_(N_(
+                    message)),
+                id="timestamp-discont",
+                priority=40)
+                self.state.append('messages', m)
 
     def pat_info_cb(self, sender, demux, param):
         self.debug("PAT info received from: %s", demux.get_name())
