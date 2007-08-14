@@ -199,8 +199,10 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         # audio or video comming out
         audiodecoder = pipeline.get_by_name('audiodecoder')
         videodecoder = pipeline.get_by_name('videodecoder')
-        self.attachPadMonitor(audiodecoder.get_pad('src'), "audiodecoder")
-        self.attachPadMonitor(videodecoder.get_pad('src'), "videodecoder")
+        if audiodecoder:
+            self.attachPadMonitor(audiodecoder.get_pad('src'), "audiodecoder")
+        if videodecoder:
+            self.attachPadMonitor(videodecoder.get_pad('src'), "videodecoder")
 
     def _bus_message_received_cb(self, bus, message):
         """
