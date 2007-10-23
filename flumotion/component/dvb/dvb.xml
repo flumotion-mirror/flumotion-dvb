@@ -28,10 +28,13 @@
 	     pid that we want to use, in the case there may be many -->
 	<property name="audio-pid" type="int" required="false" />
 	<!-- S, T -->
+	<property name="device" type="string" required="false"
+		  description="Device prefix (deprecated)" />
 	<property name="adapter" type="int" required="false" 
 	          description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
 	          description="Frontend number (eg 0 for frontend 0)" />
+	<property name="code-rate-hp" type="fraction" />
 	<!-- DVB-T specific properties -->
 	<property name="modulation" type="int" />
 	<property name="trans-mode" type="int" />
