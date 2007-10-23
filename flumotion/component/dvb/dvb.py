@@ -98,11 +98,21 @@ hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
             polarity = props.get('polarity')
             symbol_rate = props.get('symbol-rate')
             sat = props.get('satellite-number')
-            device = props.get('device', '/dev/dvb/adapter0')
-            dvbsrc_template = '''
-dvbsrc pol=%(polarity)s srate=%(symbol_rate)s
-diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
-    sat=sat, device=device)
+	        code_rate_hp = props.get('code-rate-hp', None)
+            if self._dvb_src_old:
+                dvbsrc_template = '''
+dvbsrc pol=%(polarity)s srate=%(symbol_rate)s 
+diseqc-src=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
+    sat=sat)
+            else:
+                dvbsrc_template = '''
+dvbsrc polarity=%(polarity)s symbol-rate=%(symbol_rate)s 
+diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
+    sat=sat)
+
+            if code_rate_hp:
+                dvbsrc_template = "%s code-rate-hp=%d/%d " % (dvbsrc_template,
+                    code_rate_hp[0], code_rate_hp[0], code_rate_hp[1])
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
             dvbsrc_template = 'filesrc location=%s ! video/mpegts' % filename
@@ -147,8 +157,28 @@ diseqc-src=%(sat)d''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         idsync_template = "identity check-imperfect-timestamp=true silent=true"
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
-            dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
-                freq, pids)
+            if self._dvb_src_old:
+                dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
+                    freq, pids)
+            else:
+                dvbsrc_template = "%s frequency=%d pids=%s" % (dvbsrc_template,
+                    freq, pids)
+            adapter = props.get('adapter', 0)
+            frontend = props.get('frontend', 0)
+            device = props.get('device', None)
+            if self._dvb_src_old:
+                if not device:
+                    device = "/dev/dvb/adapter%d"
+                dvbsrc_template = "%s device=%s" % (dvbsrc_template, device)
+            else:
+                if device and adapter == 0 and frontend == 0:
+                    # set adapter to be the number from /dev/dvb/adapter
+                    for adapnum in range(1,8):
+                        if str(adapnum) in device:
+                            adapter = adapnum
+                    # FIXME: add a warning here
+                dvbsrc_template = "%s adapter=%d frontend=%d" % (
+                    dvbsrc_template, adapter, frontend)
         elif self.dvb_type == "FILE":
             idsync_template = "%s sync=true" % idsync_template
         audio_pid_template = ""
