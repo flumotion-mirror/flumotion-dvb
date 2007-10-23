@@ -1,3 +1,13 @@
+2007-10-23  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py:
+	* flumotion/component/dvb/dvb.xml:
+	Make code-rate-hp both DVB-T and DVB-S. Bring back old
+	device property to allow backwards compatibility for configs.
+	Handle old dvbsrc and new dvbsrc properly.
+	Set code-rate-hp with DVB-S when specified (needed for 
+	working diseq).
+
 2007-08-14  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py (configure_pipeline):
