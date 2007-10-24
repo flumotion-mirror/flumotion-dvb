@@ -112,7 +112,7 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
 
             if code_rate_hp:
                 dvbsrc_template = "%s code-rate-hp=%d/%d " % (dvbsrc_template,
-                    code_rate_hp[0], code_rate_hp[0], code_rate_hp[1])
+                    code_rate_hp[0], code_rate_hp[1])
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
             dvbsrc_template = 'filesrc location=%s ! video/mpegts' % filename
@@ -192,9 +192,9 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     ' ! %(audiodec)s name=audiodecoder! audiorate'
                     ' ! %(identity)s name=audioid'
                     ' ! audioconvert ! level name=level ! volume name=volume'
-                    ' ! @feeder::audio@'
+                    ' ! @feeder:audio@'
                     ' t. ! queue max-size-buffers=0 max-size-time=0 !'
-                    ' @feeder::mpegts@'
+                    ' @feeder:mpegts@'
                     % dict(pids=pids, audiopid=audio_pid_template, 
                            dvbsrc=dvbsrc_template, audiodec=audio_decoder,
                            identity=idsync_template))
@@ -206,13 +206,13 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                         '    ! videorate'
                         '    ! video/x-raw-yuv,framerate=%(fr)s'
                         '    ! %(deinterlacing)s'
-                        '    ! %(scaling)s %(identity)s name=videoid ! @feeder::video@'
+                        '    ! %(scaling)s %(identity)s name=videoid ! @feeder:video@'
                         % dict(template=template, scaling=scaling_template,
                                deinterlacing=deinterlacing_template,
                                identity=idsync_template, 
                                videodec=video_decoder, fr=fr))
         else:
-            template = '%s t. ! @feeder::video@' % template
+            template = '%s t. ! @feeder:video@' % template
         return template
 
     def configure_pipeline(self, pipeline, properties):
@@ -230,9 +230,11 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
         audiodecoder = pipeline.get_by_name('audiodecoder')
         videodecoder = pipeline.get_by_name('videodecoder')
         if audiodecoder:
-            self.attachPadMonitor(audiodecoder.get_pad('src'), "audiodecoder")
+            self._pad_monitors.attach(audiodecoder.get_pad('src'), 
+                "audiodecoder")
         if videodecoder:
-            self.attachPadMonitor(videodecoder.get_pad('src'), "videodecoder")
+            self._pad_monitors.attach(videodecoder.get_pad('src'), 
+                "videodecoder")
 
     def _bus_message_received_cb(self, bus, message):
         """
