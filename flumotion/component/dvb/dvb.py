@@ -168,7 +168,7 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
             device = props.get('device', None)
             if self._dvb_src_old:
                 if not device:
-                    device = "/dev/dvb/adapter%d"
+                    device = "/dev/dvb/adapter%d" % adapter
                 dvbsrc_template = "%s device=%s" % (dvbsrc_template, device)
             else:
                 if device and adapter == 0 and frontend == 0:
