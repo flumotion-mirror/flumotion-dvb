@@ -42,7 +42,6 @@ class DVB(feedcomponent.ParseLaunchComponent):
         self.uiState.addKey('ber', 0)
         self.uiState.addKey('unc', 0)
         self.uiState.addKey('lock', False)
-        self._dvb_src_old = False
     
     def do_check(self):
         props = self.config['properties']
@@ -55,7 +54,7 @@ class DVB(feedcomponent.ParseLaunchComponent):
             "T": ["modulation", "trans-mode", 
                 "bandwidth", "code-rate-lp", "code-rate-hp", "guard",
                 "hierarchy", "frequency"],
-            "S": ["polarity", "symbol-rate", "satellite-number", "frequency"],
+            "S": ["polarity", "symbol-rate", "frequency"],
             "FILE":  ["filename"]
         }
         for param in dvb_required_parameters[dvb_type]:
@@ -64,15 +63,13 @@ class DVB(feedcomponent.ParseLaunchComponent):
                     "To use DVB-%s mode, you need to specify "
                     "property '%s'." % (
                     dvb_type, param)))
+                self.debug("No property %s for dvb-%s", param, dvb_type)
                 return defer.fail(errors.ConfigError(msg))
-        dvb_element = gst.element_factory_make("dvbsrc")
-        if hasattr(dvb_element.props, "device"):
-            self._dvb_src_old = True
 
-        if self._dvb_src_old and props.get('frontend', 0) != 0:
-            msg = "You have an old dvbsrc element that cannot use a " \
-                "frontend apart from frontend 0. Please upgrade to " \
-                "a newer or CVS gst-plugins-bad."
+        dvbbasebin_element = gst.element_factory_make("dvbbasebin")
+        if not dvbbasebin_element:
+            msg = "You do not have the dvbbasebin element. " \
+                "Please upgrade to a newer or CVS gst-plugins-bad."
             return defer.fail(errors.ConfigError(msg))
 
     def get_pipeline_string(self, props):
@@ -86,7 +83,7 @@ class DVB(feedcomponent.ParseLaunchComponent):
             guard = props.get('guard')
             hierarchy = props.get('hierarchy')
             dvbsrc_template = '''
-dvbsrc modulation="QAM %(modulation)d" 
+dvbbasebin modulation="QAM %(modulation)d" 
 trans-mode=%(trans_mode)dk
 bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s 
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
@@ -97,16 +94,10 @@ hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
         elif self.dvb_type == "S":
             polarity = props.get('polarity')
             symbol_rate = props.get('symbol-rate')
-            sat = props.get('satellite-number')
+            sat = props.get('satellite-number', 0)
 	        code_rate_hp = props.get('code-rate-hp', None)
-            if self._dvb_src_old:
-                dvbsrc_template = '''
-dvbsrc pol=%(polarity)s srate=%(symbol_rate)s 
-diseqc-src=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
-    sat=sat)
-            else:
-                dvbsrc_template = '''
-dvbsrc polarity=%(polarity)s symbol-rate=%(symbol_rate)s 
+            dvbsrc_template = '''
+dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s 
 diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate, 
     sat=sat)
 
@@ -115,7 +106,7 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     code_rate_hp[0], code_rate_hp[1])
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
-            dvbsrc_template = 'filesrc location=%s ! video/mpegts' % filename
+            dvbsrc_template = 'filesrc location=%s name=src ! video/mpegts' % filename
         has_video = props.get('has-video', True)
         video_decoder = props.get('video-decoder', 'mpeg2dec')
         audio_decoder = props.get('audio-decoder', 'mad')
@@ -150,52 +141,44 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                         h=height))
         framerate = props.get('framerate', (25, 2))
         fr = "%d/%d" % (framerate[0], framerate[1])
-        pids = props.get('pids')
+        program_number = props.get('program-number')
         audio_pid = props.get('audio-pid', 0)
         # identity to check for imperfect timestamps also for
         # use to sync to the clock when we use a file
         idsync_template = "identity check-imperfect-timestamp=true silent=true"
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
-            if self._dvb_src_old:
-                dvbsrc_template = "%s freq=%d pids=%s" % (dvbsrc_template,
-                    freq, pids)
-            else:
-                dvbsrc_template = "%s frequency=%d pids=%s" % (dvbsrc_template,
-                    freq, pids)
+            dvbsrc_template = "%s frequency=%d program-numbers=%d name=src" % (
+                dvbsrc_template, freq, program_number)
             adapter = props.get('adapter', 0)
             frontend = props.get('frontend', 0)
             device = props.get('device', None)
-            if self._dvb_src_old:
-                if not device:
-                    device = "/dev/dvb/adapter%d" % adapter
-                dvbsrc_template = "%s device=%s" % (dvbsrc_template, device)
-            else:
-                if device and adapter == 0 and frontend == 0:
-                    # set adapter to be the number from /dev/dvb/adapter
-                    for adapnum in range(1,8):
-                        if str(adapnum) in device:
-                            adapter = adapnum
-                    # FIXME: add a warning here
-                dvbsrc_template = "%s adapter=%d frontend=%d" % (
-                    dvbsrc_template, adapter, frontend)
+            if device and adapter == 0 and frontend == 0:
+                # set adapter to be the number from /dev/dvb/adapter
+                for adapnum in range(1,8):
+                    if str(adapnum) in device:
+                        adapter = adapnum
+                # FIXME: add a warning here
+            dvbsrc_template = "%s adapter=%d frontend=%d" % (
+                dvbsrc_template, adapter, frontend)
         elif self.dvb_type == "FILE":
             idsync_template = "%s sync=true" % idsync_template
         audio_pid_template = ""
         if audio_pid > 0:
             # transport stream demuxer expects this as 4 digit hex
             audio_pid_template = "audio_%04x " % audio_pid
-        template = ('%(dvbsrc)s'
-                    ' ! tee name=t ! flutsdemux name=demux'
+        template = ('%(dvbsrc)s ! tee name=t'
+                    ' ! queue max-size-buffers=0 max-size-time=0 '
+                    ' ! flutsdemux name=demux'
                     ' demux.%(audiopid)s ! '
                     ' queue max-size-buffers=0 max-size-time=0'
-                    ' ! %(audiodec)s name=audiodecoder! audiorate'
+                    ' ! %(audiodec)s name=audiodecoder ! audiorate'
                     ' ! %(identity)s name=audioid'
                     ' ! audioconvert ! level name=level ! volume name=volume'
                     ' ! @feeder:audio@'
-                    ' t. ! queue max-size-buffers=0 max-size-time=0 !'
-                    ' @feeder:mpegts@'
-                    % dict(pids=pids, audiopid=audio_pid_template, 
+                    ' t. ! queue max-size-buffers=0 max-size-time=0 '
+                    ' ! @feeder:mpegts@'
+                    % dict(audiopid=audio_pid_template, 
                            dvbsrc=dvbsrc_template, audiodec=audio_decoder,
                            identity=idsync_template))
         if has_video:
@@ -206,7 +189,8 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                         '    ! videorate'
                         '    ! video/x-raw-yuv,framerate=%(fr)s'
                         '    ! %(deinterlacing)s'
-                        '    ! %(scaling)s %(identity)s name=videoid ! @feeder:video@'
+                        '    ! %(scaling)s %(identity)s name=videoid '
+                        '    ! @feeder:video@'
                         % dict(template=template, scaling=scaling_template,
                                deinterlacing=deinterlacing_template,
                                identity=idsync_template, 
