@@ -80,6 +80,7 @@
        <directories>
            <directory name="flumotion/component/dvb">
                <filename location="dvb.py" />
+               <filename location="dvbbin.py" />
            </directory>
        </directories>
     </bundle>
