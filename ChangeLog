@@ -1,5 +1,10 @@
 2008-02-29  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
+	* flumotion/component/dvb/admin_gtk.py:
+	Rename Signal Stats to Signal Statistics.
+
+2008-02-29  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
 	* conf/dvb-t-two-channels-ogg.xml:
 	* conf/dvb-t-two-channels.xml:
 	Example flow files to have 2 channels streamed from same
