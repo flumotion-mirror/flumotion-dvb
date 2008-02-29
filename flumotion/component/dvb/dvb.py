@@ -28,13 +28,87 @@ from flumotion.common import messages
 from flumotion.common.messages import N_
 T_ = messages.gettexter('flumotion')
 
+
+def get_decode_pipeline_string(props):
+    has_video = props.get('has-video', True)
+    video_decoder = props.get('video-decoder', 'mpeg2dec')
+    audio_decoder = props.get('audio-decoder', 'mad')
+    deinterlacer = props.get('deinterlacer', None)
+    # we only want to scale if specifically told to in config
+    scaling_template = ""
+    deinterlacing_template = deinterlacer
+    width = props.get('width', None)
+    height = props.get('height', None)
+    scaled_width = 720
+    if width and height:
+        scaled_width = props.get('scaled-width', width)
+    if not deinterlacer:
+        interlaced_height = 288
+        deinterlacing_template = ('videoscale method=1 ! '
+            ' video/x-raw-yuv,width=%(sw)s,height=%(ih)s ' % dict(
+            sw=scaled_width, ih=interlaced_height))
+    else:
+        deinterlacing_template = deinterlacer
+    if "width" in props and "height" in props:
+        par = props.get('pixel-aspect-ratio')
+        if par:
+            scaling_template = ('videoscale method=1 !'
+                ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
+                'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
+                    sw=scaled_width, 
+                    h=height, par_n=par[0], par_d=par[1]))
+        else:
+            scaling_template = ('videoscale method=1 !'
+                'video/x-raw-yuv,width=%(sw)s,height=%(h)s !' % dict(
+                    sw=scaled_width,
+                    h=height))
+    framerate = props.get('framerate', (25, 2))
+    fr = "%d/%d" % (framerate[0], framerate[1])
+    program_number = props.get('program-number')
+    audio_pid = props.get('audio-pid', 0)
+    # identity to check for imperfect timestamps also for
+    # use to sync to the clock when we use a file
+    idsync_template = "identity check-imperfect-timestamp=true silent=true"
+    audio_pid_template = ""
+    if audio_pid > 0:
+        # transport stream demuxer expects this as 4 digit hex
+        audio_pid_template = "audio_%04x " % audio_pid
+    template = 'flutsdemux name=demux program-number=%(program_number)d' \
+        ' demux.%(audiopid)s ! ' \
+        ' queue max-size-buffers=0 max-size-time=0' \
+        ' ! %(audiodec)s name=audiodecoder ! audiorate' \
+        ' ! %(identity)s name=audioid' \
+        ' ! audioconvert ! level name=level ! volume name=volume' \
+        ' ! tee name=t ! @feeder:audio@' % dict(
+            audiopid=audio_pid_template, 
+            audiodec=audio_decoder,
+            identity=idsync_template,
+            program_number=program_number)
+    if has_video:
+        template = ('%(template)s demux. ! ' \
+                    ' queue max-size-buffers=0 max-size-time=0 ' \
+                    ' ! mpegvideoparse ! %(videodec)s name=videodecoder' \
+                    '    ! video/x-raw-yuv' \
+                    '    ! videorate' \
+                    '    ! video/x-raw-yuv,framerate=%(fr)s' \
+                    '    ! %(deinterlacing)s' \
+                    '    ! %(scaling)s %(identity)s name=videoid ' \
+                    '    ! @feeder:video@' % dict(template=template, 
+                            scaling=scaling_template,
+                            deinterlacing=deinterlacing_template,
+                            identity=idsync_template, 
+                            videodec=video_decoder, fr=fr))
+    else:
+        template = '%s t. ! @feeder:video@' % template
+    return template
+
 # Statistics we get from DVB are:
 # signal: signal strength (0 - 65535)
 # snr: signal to noise ratio (0 - 65535)
 # ber: bit error rate (seems to be driver specific scale)
 # unc: uncorrected bits (should be cumulative but drivers do not follow spec)
 # lock: locked to signal (boolean)
-class DVB(feedcomponent.ParseLaunchComponent):
+class DVBTSProducer(feedcomponent.ParseLaunchComponent):
 
     def init(self):
         self.uiState.addKey('signal', 0)
@@ -43,7 +117,7 @@ class DVB(feedcomponent.ParseLaunchComponent):
         self.uiState.addKey('unc', 0)
         self.uiState.addKey('lock', False)
     
-    def do_check(self):
+    def do_check_dvb(self):
         props = self.config['properties']
         dvb_type = self.dvb_type = props.get('dvb-type')
         if dvb_type != 'T' and dvb_type != 'S' and dvb_type != 'FILE':
@@ -69,11 +143,17 @@ class DVB(feedcomponent.ParseLaunchComponent):
         dvbbasebin_element = gst.element_factory_make("dvbbasebin")
         if not dvbbasebin_element:
             msg = "You do not have the dvbbasebin element. " \
-                "Please upgrade to a newer or CVS gst-plugins-bad."
+                "Please upgrade to at least gst-plugins-bad 0.10.6."
             return defer.fail(errors.ConfigError(msg))
 
-    def get_pipeline_string(self, props):
+    def do_check(self):
+        return self.do_check_dvb()
+
+    def get_dvbsrc_pipeline_string(self, props):
         dvbsrc_template = ""
+        program_numbers = props.get('program-numbers')
+        if not program_numbers:
+            program_numbers = "%d" % props.get('program-number')
         if self.dvb_type == "T":
             modulation = props.get('modulation')
             trans_mode = props.get('trans-mode')
@@ -89,7 +169,7 @@ bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
 hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
                 bandwidth=bandwidth, code_rate_lp=code_rate_lp,
-                code_rate_hp="%d/%d" % (code_rate_hp[0], code_rate_hp[1]),
+                code_rate_hp=code_rate_hp,
                 guard=guard, hierarchy=hierarchy)
         elif self.dvb_type == "S":
             polarity = props.get('polarity')
@@ -102,54 +182,16 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
     sat=sat)
 
             if code_rate_hp:
-                dvbsrc_template = "%s code-rate-hp=%d/%d " % (dvbsrc_template,
-                    code_rate_hp[0], code_rate_hp[1])
+                dvbsrc_template = "%s code-rate-hp=%s " % (dvbsrc_template,
+                    code_rate_hp)
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
-            dvbsrc_template = 'filesrc location=%s name=src ! video/mpegts' % filename
-        has_video = props.get('has-video', True)
-        video_decoder = props.get('video-decoder', 'mpeg2dec')
-        audio_decoder = props.get('audio-decoder', 'mad')
-        deinterlacer = props.get('deinterlacer', None)
-        # we only want to scale if specifically told to in config
-        scaling_template = ""
-        deinterlacing_template = deinterlacer
-        width = props.get('width', None)
-        height = props.get('height', None)
-        scaled_width = 720
-        if width and height:
-            scaled_width = props.get('scaled-width', width)
-        if not deinterlacer:
-            interlaced_height = 288
-            deinterlacing_template = ('videoscale method=1 ! '
-                ' video/x-raw-yuv,width=%(sw)s,height=%(ih)s ' % dict(
-                sw=scaled_width, ih=interlaced_height))
-        else:
-            deinterlacing_template = deinterlacer
-        if "width" in props and "height" in props:
-            par = props.get('pixel-aspect-ratio')
-            if par:
-                scaling_template = ('videoscale method=1 !'
-                    ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
-                    'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
-                        sw=scaled_width, 
-                        h=height, par_n=par[0], par_d=par[1]))
-            else:
-                scaling_template = ('videoscale method=1 !'
-                    'video/x-raw-yuv,width=%(sw)s,height=%(h)s !' % dict(
-                        sw=scaled_width,
-                        h=height))
-        framerate = props.get('framerate', (25, 2))
-        fr = "%d/%d" % (framerate[0], framerate[1])
-        program_number = props.get('program-number')
-        audio_pid = props.get('audio-pid', 0)
-        # identity to check for imperfect timestamps also for
-        # use to sync to the clock when we use a file
-        idsync_template = "identity check-imperfect-timestamp=true silent=true"
+            dvbsrc_template = """filesrc location=%s name=src 
+                ! mpegtsparse program-numbers=%d""" % (filename,program_numbers)
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
-            dvbsrc_template = "%s frequency=%d program-numbers=%d name=src" % (
-                dvbsrc_template, freq, program_number)
+            dvbsrc_template = "%s frequency=%d program-numbers=%s name=src" % (
+                dvbsrc_template, freq, program_numbers)
             adapter = props.get('adapter', 0)
             frontend = props.get('frontend', 0)
             device = props.get('device', None)
@@ -161,50 +203,73 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                 # FIXME: add a warning here
             dvbsrc_template = "%s adapter=%d frontend=%d" % (
                 dvbsrc_template, adapter, frontend)
-        elif self.dvb_type == "FILE":
-            idsync_template = "%s sync=true" % idsync_template
-        audio_pid_template = ""
-        if audio_pid > 0:
-            # transport stream demuxer expects this as 4 digit hex
-            audio_pid_template = "audio_%04x " % audio_pid
-        template = ('%(dvbsrc)s ! tee name=t'
-                    ' ! queue max-size-buffers=0 max-size-time=0 '
-                    ' ! flutsdemux name=demux'
-                    ' demux.%(audiopid)s ! '
-                    ' queue max-size-buffers=0 max-size-time=0'
-                    ' ! %(audiodec)s name=audiodecoder ! audiorate'
-                    ' ! %(identity)s name=audioid'
-                    ' ! audioconvert ! level name=level ! volume name=volume'
-                    ' ! @feeder:audio@'
-                    ' t. ! queue max-size-buffers=0 max-size-time=0 '
-                    ' ! @feeder:mpegts@'
-                    % dict(audiopid=audio_pid_template, 
-                           dvbsrc=dvbsrc_template, audiodec=audio_decoder,
-                           identity=idsync_template))
-        if has_video:
-            template = ('%(template)s demux. ! '
-                        ' queue max-size-buffers=0 max-size-time=0 '
-                        ' ! %(videodec)s name=videodecoder'
-                        '    ! video/x-raw-yuv'
-                        '    ! videorate'
-                        '    ! video/x-raw-yuv,framerate=%(fr)s'
-                        '    ! %(deinterlacing)s'
-                        '    ! %(scaling)s %(identity)s name=videoid '
-                        '    ! @feeder:video@'
-                        % dict(template=template, scaling=scaling_template,
-                               deinterlacing=deinterlacing_template,
-                               identity=idsync_template, 
-                               videodec=video_decoder, fr=fr))
-        else:
-            template = '%s t. ! @feeder:video@' % template
+        dvbsrc_template = "%s .src%%d" % dvbsrc_template
+        return dvbsrc_template
+
+    def get_pipeline_string(self, props):
+        dvbsrc_template = self.get_dvbsrc_pipeline_string(props)
+        template = ('%(dvbsrc)s ! @feeder:default@'
+                    % dict(dvbsrc=dvbsrc_template))
         return template
 
     def configure_pipeline(self, pipeline, properties):
         bus = pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message::element', self._bus_message_received_cb)
-        pipeline.connect("deep-notify::pat-info", self.pat_info_cb)
-        pipeline.connect("deep-notify::pmt-info", self.pmt_info_cb)
+
+    def _bus_message_received_cb(self, bus, message):
+        """
+        @param bus: the message bus sending the message
+        @param message: the message received
+        """
+        if message.structure.get_name() == 'dvb-frontend-stats':
+            # we have frontend stats, lets update ui state
+            s = message.structure
+            self.uiState.set('signal', s["signal"])
+            self.uiState.set('snr', s["snr"])
+            self.uiState.set('ber', s["ber"])
+            self.uiState.set('unc', s["unc"])
+            self.uiState.set('lock', s["lock"])
+        elif message.structure.get_name() == 'pat':
+            self.debug("PAT info received")
+            s = message.structure
+            for prog in s["programs"]:
+                self.debug("PAT: Program %d on PID 0x%04x",
+                    prog["program-number"], prog["pid"])
+        elif message.structure.get_name() == 'pmt':
+            s = message.structure
+            self.debug("PMT info received for program %d", s["program-number"])
+            for stream in s["streams"]:
+                self.debug("PMT: Stream on pid 0x%04x of type: %d", 
+                    stream["pid"], 
+                    stream["stream-type"])
+
+class DVB(DVBTSProducer):
+
+    def init(self):
+        self.uiState.addKey('signal', 0)
+        self.uiState.addKey('snr', 0)
+        self.uiState.addKey('ber', 0)
+        self.uiState.addKey('unc', 0)
+        self.uiState.addKey('lock', False)
+    
+    def do_check(self):
+        return self.do_check_dvb()
+
+    def get_pipeline_string(self, props):
+        dvbsrc_template = self.get_dvbsrc_pipeline_string(props)
+        decode_template = get_decode_pipeline_string(props)
+        template = "%s ! tee name=t ! " \
+            "queue max-size-time=0 max-size-buffers=0 ! %s" \
+            " t. ! queue max-size-time=0 max-size-buffers=0 ! " \
+            "@feeder:mpegts@" % (dvbsrc_template, decode_template)
+        return template
+
+    
+    def configure_pipeline(self, pipeline, properties):
+        bus = pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect('message::element', self._bus_message_received_cb)
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
@@ -253,6 +318,18 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                 id="timestamp-discont",
                 priority=40)
                 self.state.append('messages', m)
+        elif message.structure.get_name() == 'pat':
+            self.debug("PAT info received")
+            s = message.structure
+            for prog in s["programs"]:
+                self.debug("PAT: Program %d on PID 0x%04x",
+                    prog["program_number"], prog["pid"])
+        elif message.structure.get_name() == 'pmt':
+            s = message.structure
+            self.debug("PMT info received for program %d", s["program-number"])
+            for stream in s["streams"]:
+                self.debug("PMT: pid %d type: %d", stream["pid"], 
+                    stream["stream-type"])
 
     def pat_info_cb(self, sender, demux, param):
         self.debug("PAT info received from: %s", demux.get_name())
@@ -280,3 +357,51 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
     def getVolume(self):
         element = self.get_element('volume')
         return element.get_property('volume')
+
+class MpegTSSplitter(feedcomponent.ParseLaunchComponent):
+    def do_check(self):
+        tsparse_element = gst.element_factory_make("mpegtsparse")
+        if not tsparse_element:
+            msg = "You do not have the mpegtsparse element. " \
+                "Please upgrade to at least gst-plugins-bad 0.10.6."
+            return defer.fail(errors.ConfigError(msg))
+
+    def get_pipeline_string(self, props):
+        program_number = props.get("program-number")
+        template = "mpegtsparse program-numbers=%d .program_%d"  % (
+            program_number, program_number)
+        return template
+
+class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
+
+    def init(self):
+        pass
+
+    def get_pipeline_string(self, props):
+        return get_decode_pipeline_string(props)
+
+    def configure_pipeline(self, pipeline, properties):
+        # add volume effect
+        level = pipeline.get_by_name('level')
+        vol = volume.Volume('volume', level, pipeline)
+        self.addEffect(vol)
+        # attach pad monitors to make sure we know when there is no
+        # audio or video coming out
+        audiodecoder = pipeline.get_by_name('audiodecoder')
+        videodecoder = pipeline.get_by_name('videodecoder')
+        if audiodecoder:
+            self._pad_monitors.attach(audiodecoder.get_pad('src'), 
+                "audiodecoder")
+        if videodecoder:
+            self._pad_monitors.attach(videodecoder.get_pad('src'), 
+                "videodecoder")
+
+    def setVolume(self, value):
+        self.debug("Volume set to %d" % value)
+        element = self.get_element('volume')
+        element.set_property('volume', value)
+
+    def getVolume(self):
+        element = self.get_element('volume')
+        return element.get_property('volume')
+
