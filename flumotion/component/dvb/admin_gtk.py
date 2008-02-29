@@ -81,8 +81,8 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
 class DVBBaseAdminGtk(admin_gtk.BaseAdminGtk):
     def setup(self):
         dvbnode = DVBAdminGtkNode(self.state, self.admin,
-                                  title="Signal Stats")
-        self.nodes['Signal Stats'] = dvbnode
+                                  title="Signal Statistics")
+        self.nodes['Signal Statistics'] = dvbnode
         return admin_gtk.BaseAdminGtk.setup(self)
 
 class DVBAdminGtk(DVBBaseAdminGtk):
