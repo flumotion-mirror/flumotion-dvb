@@ -13,8 +13,6 @@
                function="DVBAdminGtk" />
       </entries>
 
-      <!-- <synchronization required="yes" /> -->
-
       <properties>
         <!-- S, T or FILE -->
         <property name="dvb-type" type="string" required="true" />
@@ -56,6 +54,91 @@
 	<property name="deinterlacer" type="string" />
       </properties>
     </component>
+
+    <component type="dvb-ts-producer"
+               base="flumotion/component/dvb">
+      <source location="flumotion.component.dvb.dvb" />
+      <feeder name="default" />
+      <entries>
+        <entry type="component" location="dvb.py"
+               function="DVBTSProducer" />
+	<entry type="admin/gtk" location="admin_gtk.py"
+               function="DVBBaseAdminGtk" />
+      </entries>
+
+      <properties>
+        <!-- S, T or FILE -->
+        <property name="dvb-type" type="string" required="true" />
+	<property name="frequency" type="int" required="false" />
+	<property name="program-numbers" type="string" required="true" />
+	<!-- S, T -->
+	<property name="device" type="string" required="false"
+		  description="Device prefix (deprecated)" />
+	<property name="adapter" type="int" required="false" 
+	          description="Adapter number (eg 0 for adapter 0)" />
+	<property name="frontend" type="int" required="false"
+	          description="Frontend number (eg 0 for frontend 0)" />
+	<property name="code-rate-hp" type="string" />
+	<!-- DVB-T specific properties -->
+	<property name="modulation" type="int" />
+	<property name="trans-mode" type="int" />
+        <property name="bandwidth" type="int" />
+        <property name="code-rate-lp" type="string" />
+	<property name="guard" type="int" />
+	<property name="hierarchy" type="int" />
+	<!-- DVB-S specific properties -->
+	<property name="polarity" type="string" />
+	<property name="symbol-rate" type="string" />
+	<property name="satellite-number" type="int" />	
+	<!-- File specific properties -->
+	<property name="filename" type="string" />
+	<!-- output properties -->
+      </properties>
+    </component>
+
+    <component type="mpeg-ts-splitter"
+               base="flumotion/component/dvb">
+      <source location="flumotion.component.dvb.dvb" />
+      <eater name="default" />
+      <feeder name="default" />
+      <entries>
+        <entry type="component" location="dvb.py"
+               function="MpegTSSplitter" />
+      </entries>
+      <properties>
+        <property name="program-number" type="int" />
+      </properties>
+    </component>
+
+    <component type="mpeg-ts-decoder"
+               base="flumotion/component/dvb">
+      <source location="flumotion.component.dvb.dvb" />
+      <eater name="default" />
+      <feeder name="audio" />
+      <feeder name="video" />
+      <entries>
+        <entry type="component" location="dvb.py"
+               function="MpegTSDecoder" />
+	<entry type="admin/gtk" location="admin_gtk.py"
+               function="MpegTSDecoderAdminGtk" />
+
+      </entries>
+
+      <properties>
+        <property name="program-number" type="int" required="true" />
+	<!-- audio pid: optional argument used to identify the audio
+	     pid that we want to use, in the case there may be many -->
+	<property name="audio-pid" type="int" required="false" />
+	<!-- output properties -->
+	<property name="width" type="int" />
+	<property name="height" type="int" />
+	<property name="scaled-width" type="int" />
+	<property name="framerate" type="fraction" />
+	<property name="pixel-aspect-ratio" type="fraction" />
+	<property name="deinterlacer" type="string" />
+      </properties>
+    </component>
+
   </components>
   <bundles>
     <bundle project="dvb" name="dvb-base">
@@ -80,7 +163,6 @@
        <directories>
            <directory name="flumotion/component/dvb">
                <filename location="dvb.py" />
-               <filename location="dvbbin.py" />
            </directory>
        </directories>
     </bundle>

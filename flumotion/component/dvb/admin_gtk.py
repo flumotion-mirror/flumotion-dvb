@@ -78,13 +78,25 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
         if self._lock:
             self._lock.set_text(str(locked))
 
-class DVBAdminGtk(admin_gtk.BaseAdminGtk):
+class DVBBaseAdminGtk(admin_gtk.BaseAdminGtk):
     def setup(self):
         dvbnode = DVBAdminGtkNode(self.state, self.admin,
-                                  title="DVB")
-        self.nodes['DVB'] = dvbnode
+                                  title="Signal Stats")
+        self.nodes['Signal Stats'] = dvbnode
+        return admin_gtk.BaseAdminGtk.setup(self)
+
+class DVBAdminGtk(DVBBaseAdminGtk):
+    def setup(self):
         volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
                                                'volume', title=_("Volume"))
         self.nodes['Volume'] = volume
 
-        return admin_gtk.BaseAdminGtk.setup(self)
+        return DVBBaseAdminGtk.BaseAdminGtk.setup(self)
+
+class MpegTSDecoderAdminGtk(admin_gtk.BaseAdminGtk):
+    def setup(self):
+        volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
+                                               'volume', title=_("Volume"))
+        self.nodes['Volume'] = volume
+
+        return admin_gtk.BaseAdminGtk.setup(self)        
