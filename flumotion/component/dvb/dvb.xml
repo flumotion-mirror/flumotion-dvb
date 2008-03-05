@@ -52,6 +52,8 @@
 	<property name="framerate" type="fraction" />
 	<property name="pixel-aspect-ratio" type="fraction" />
 	<property name="deinterlacer" type="string" />
+	<!-- ignored, but kept for backward compatibility -->
+	<property name="pids" type="string" />
       </properties>
     </component>
 
