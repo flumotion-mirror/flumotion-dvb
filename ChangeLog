@@ -1,3 +1,9 @@
+2008-03-05  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.xml:
+	Add back pids property for backwards compatibility, even
+	though it is just going to be ignored.
+
 2008-02-29  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/admin_gtk.py:
