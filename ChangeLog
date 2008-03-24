@@ -1,3 +1,9 @@
+2008-03-24  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/admin_gtk.py:
+	* flumotion/component/dvb/dvb.py:
+	Add a channel information node to the dvb producers.
+
 2008-03-05  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.xml:
