@@ -116,6 +116,8 @@ class DVBTSProducer(feedcomponent.ParseLaunchComponent):
         self.uiState.addKey('ber', 0)
         self.uiState.addKey('unc', 0)
         self.uiState.addKey('lock', False)
+        self.uiState.addDictKey('channelnames')
+        self.uiState.addDictKey('whatson')
     
     def do_check_dvb(self):
         props = self.config['properties']
@@ -154,6 +156,7 @@ class DVBTSProducer(feedcomponent.ParseLaunchComponent):
         program_numbers = props.get('program-numbers')
         if not program_numbers:
             program_numbers = "%d" % props.get('program-number')
+        self.program_numbers = program_numbers.split(":")
         if self.dvb_type == "T":
             modulation = props.get('modulation')
             trans_mode = props.get('trans-mode')
@@ -243,7 +246,45 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                 self.debug("PMT: Stream on pid 0x%04x of type: %d", 
                     stream["pid"], 
                     stream["stream-type"])
-
+        elif message.structure.get_name() == "sdt":
+            s = message.structure
+            actual = s["actual-transport-stream"]
+            if actual:
+                services = s["services"]
+                for service in services:
+                    name = service.get_name()
+                    sid =  name[8:]
+                    if service.has_key("name"):
+                        name = service["name"]
+                    if sid in self.program_numbers:
+                        self.debug("Setting channel %s to have name %s", 
+                            sid, name)
+                        self.uiState.setitem('channelnames', sid, name)
+        elif message.structure.get_name() == "eit":
+            s = message.structure
+            self.debug("eit received for sid %d", s["service-id"])
+            if str(s["service-id"]) in self.program_numbers:
+                events = s["events"]
+                for e in events:
+                    if e["running-status"] == 4:
+                        txt = "%d/%d/%d %d:%d (%d minutes)" % (
+                            e["day"], e["month"], e["year"], e["hour"],
+                            e["minute"], e["duration"]/60)
+                        if e.has_key("name"):
+                            txt = "%s %s" % (txt, e["name"])
+                        if e.has_key("description"):
+                            txt = "%s: %s" % (txt, e["description"])
+                        self.debug("Now on channel %s: %s", 
+                            str(s["service-id"]), txt)
+                        self.uiState.setitem('whatson', str(s["service-id"]),
+                            txt)
+                    name = "None"
+                    if e.has_key("name"):
+                        name = e["name"]
+                    self.debug("event %s of running status: %d", 
+                        name,
+                        e["running-status"])
+                    
 class DVB(DVBTSProducer):
 
     def init(self):
