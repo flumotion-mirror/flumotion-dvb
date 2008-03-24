@@ -23,8 +23,75 @@ from gettext import gettext as _
 
 from flumotion.component.base import admin_gtk
 from flumotion.component.effects.volume import admin_gtk as vadmin_gtk
+from kiwi.ui.objectlist import Column, ObjectList
 
-class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
+# Copied from component/base/admin_gtk.py
+class _StateWatcher(object):
+    def __init__(self, state, setters, appenders, removers,
+            setitemers=None, delitemers=None):
+        self.state = state
+        self.setters = setters
+        self.appenders = appenders
+        self.removers = removers
+        self.setitemers = setitemers
+        self.delitemers = delitemers
+        self.shown = False
+
+        state.addListener(self, set=self.onSet, append=self.onAppend,
+                          remove=self.onRemove, setitem=self.onSetItem,
+                          delitem=self.onDelItem)
+
+        for k in appenders:
+            for v in state.get(k):
+                self.onAppend(state, k, v)
+
+        for k in setters:
+            for v in state.get(k):
+                self.onSet(state, k, v)
+
+    def hide(self):
+        if self.shown:
+            for k in self.setters:
+                self.onSet(self.state, k, None)
+     		self.shown = False
+
+    def show(self):
+        # "show" the watcher by triggering all the registered setters
+        if not self.shown:
+           self.shown = True
+           for k in self.setters:
+               self.onSet(self.state, k, self.state.get(k))
+
+    def onSet(self, obj, k, v):
+        if self.shown and k in self.setters:
+           self.setters[k](self.state, v)
+
+    def onAppend(self, obj, k, v):
+        if k in self.appenders:
+           self.appenders[k](self.state, v)
+
+    def onRemove(self, obj, k, v):
+        if k in self.removers:
+           self.removers[k](self.state, v)
+
+    def onSetItem(self, obj, k, sk, v):
+        if self.shown and k in self.setitemers:
+            self.setitemers[k](self.state, sk, v)
+
+    def onDelItem(self, obj, k, sk, v):
+        if self.shown and k in self.setitemers:
+           self.setitemers[k](self.state, sk, v)
+
+    def unwatch(self):
+        if self.state:
+           self.hide()
+           for k in self.removers:
+               for v in self.state.get(k):
+                   self.onRemove(self.state, k, v)
+               self.state.removeListener(self)
+               self.state = None
+
+class SignalStatisticsAdminGtkNode(admin_gtk.BaseAdminGtkNode):
     logCategory = 'dvb'
     glade_file = 'flumotion/component/dvb/dvb.glade'
     uiStateHandlers = None
@@ -78,11 +145,106 @@ class DVBAdminGtkNode(admin_gtk.BaseAdminGtkNode):
         if self._lock:
             self._lock.set_text(str(locked))
 
+class DVBChannel:
+    def __init__(self, programnumber, name):
+        self.programnumber = programnumber
+        self.name = name
+        self.whatson = ""
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_whatson(self, whatson):
+        self.whatson = whatson
+
+class DVBServiceInformationAdminGtkNode(admin_gtk.BaseAdminGtkNode):
+    channels = {}
+    siwidget = None
+    def render(self):
+        def createWidget(res):
+            self.siwidget = ObjectList([Column('programnumber', 'Program Number', 
+                data_type=str),
+                Column('name', data_type=str),
+                Column('whatson', 'What\'s On', data_type=str)])
+            whatsontvcolumn = self.siwidget.get_treeview_column(\
+                self.siwidget.get_column_by_name('whatson'))
+            import pango
+            for renderer in whatsontvcolumn.get_cell_renderers():
+                renderer.set_property('wrap-width', 200)
+                renderer.set_property('wrap-mode', pango.WRAP_WORD)
+            self.wtree = self.siwidget
+            return self.siwidget
+        d = admin_gtk.BaseAdminGtkNode.render(self)
+        d.addCallback(createWidget)
+        return d
+
+    def setUIState(self, state):
+        admin_gtk.BaseAdminGtkNode.setUIState(self, state)
+        self._watcher = _StateWatcher(state, 
+           {
+               'channelnames':	self._setChannelName,
+               'whatson':   self._setWhatsOn,
+           }, 
+           {},
+           {},
+           setitemers={
+               'channelnames':	self._setChannelNameItem,
+               'whatson':   self._setWhatsOnItem,
+           },
+           delitemers={
+               'channelnames':	self._delChannelNameItem,
+               'whatson':   self._delWhatsOnItem,
+           })
+        self._watcher.show()
+        for chan in self.channels:
+            self.siwidget.append(chan)
+
+    def _setChannelName(self, state, value):
+        if value is None:
+           return
+        for k,v in value.items():
+           self._setChannelNameItem(state, k, v)
+	
+    def _setChannelNameItem(self, state, key, value):
+        if self.channels.has_key(key):
+            chan = self.channels[key]
+            chan.set_name(value)
+        else:
+            self.channels[key] = DVBChannel(key, value)
+            if self.siwidget:
+                self.siwidget.append(self.channels[key])
+	
+    def _delChannelNameItem(self, state, key, value):
+        pass
+
+    def _setWhatsOn(self, state, value):
+        if value is None:
+            return
+        for k,v in value.items():
+            self._setWhatsOnItem(state, k, v)
+
+    def _setWhatsOnItem(self, state, key, value):
+        if self.channels.has_key(key):
+            chan = self.channels[key]
+            chan.set_whatson(value)
+        else:
+            chan = DVBChannel(key, "")
+            chan.set_whatson(value)
+            self.channels[key] = chan
+            if self.siwidget:
+                self.siwidget.append(chan)
+    
+    def _delWhatsOnItem(self, state, key, value):
+        pass
+
 class DVBBaseAdminGtk(admin_gtk.BaseAdminGtk):
     def setup(self):
-        dvbnode = DVBAdminGtkNode(self.state, self.admin,
+        dvbnode = SignalStatisticsAdminGtkNode(self.state, self.admin,
                                   title="Signal Statistics")
         self.nodes['Signal Statistics'] = dvbnode
+        channelsnode = DVBServiceInformationAdminGtkNode(self.state, self.admin,
+            title="Channel Information")
+        self.nodes["Channel Information"] = channelsnode
         return admin_gtk.BaseAdminGtk.setup(self)
 
 class DVBAdminGtk(DVBBaseAdminGtk):
