@@ -287,13 +287,6 @@ diseqc-source=%(sat)d ''' % dict(polarity=polarity, symbol_rate=symbol_rate,
                     
 class DVB(DVBTSProducer):
 
-    def init(self):
-        self.uiState.addKey('signal', 0)
-        self.uiState.addKey('snr', 0)
-        self.uiState.addKey('ber', 0)
-        self.uiState.addKey('unc', 0)
-        self.uiState.addKey('lock', False)
-    
     def do_check(self):
         return self.do_check_dvb()
 
@@ -308,9 +301,7 @@ class DVB(DVBTSProducer):
 
     
     def configure_pipeline(self, pipeline, properties):
-        bus = pipeline.get_bus()
-        bus.add_signal_watch()
-        bus.connect('message::element', self._bus_message_received_cb)
+        super(DVBTSProducer, self).configure_pipeline()
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
@@ -399,7 +390,12 @@ class DVB(DVBTSProducer):
         element = self.get_element('volume')
         return element.get_property('volume')
 
-class MpegTSSplitter(feedcomponent.ParseLaunchComponent):
+class MpegTSSplitter(DVBTSProducer):
+    
+    def init(self):
+        self.uiState.addDictKey('channelnames')
+        self.uiState.addDictKey('whatson')
+
     def do_check(self):
         tsparse_element = gst.element_factory_make("mpegtsparse")
         if not tsparse_element:
@@ -445,4 +441,3 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
     def getVolume(self):
         element = self.get_element('volume')
         return element.get_property('volume')
-
