@@ -395,8 +395,8 @@ class MpegTSSplitter(DVBTSProducer):
     def init(self):
         self.uiState.addDictKey('channelnames')
         self.uiState.addDictKey('whatson')
-
-    def do_check(self):
+    
+    def do_check_dvb(self):
         tsparse_element = gst.element_factory_make("mpegtsparse")
         if not tsparse_element:
             msg = "You do not have the mpegtsparse element. " \
