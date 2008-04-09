@@ -1,3 +1,10 @@
+2008-04-09  Arek Korbik  <arkadini@gmail.com>
+
+	* flumotion/component/dvb/dvb.xml:
+	Make 'code-rate-hp' a string - it should accept non-fractions,
+	too.
+
+
 2008-04-09  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py:
