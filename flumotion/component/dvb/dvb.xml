@@ -31,7 +31,7 @@
 	          description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
 	          description="Frontend number (eg 0 for frontend 0)" />
-	<property name="code-rate-hp" type="fraction" />
+	<property name="code-rate-hp" type="string" />
 	<!-- DVB-T specific properties -->
 	<property name="modulation" type="int" />
 	<property name="trans-mode" type="int" />
