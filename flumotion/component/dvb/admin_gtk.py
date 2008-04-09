@@ -206,6 +206,7 @@ class DVBServiceInformationAdminGtkNode(admin_gtk.BaseAdminGtkNode):
            self._setChannelNameItem(state, k, v)
 	
     def _setChannelNameItem(self, state, key, value):
+        self.debug("set channel name item %s:%s", key, value)
         if self.channels.has_key(key):
             chan = self.channels[key]
             chan.set_name(value)
@@ -253,7 +254,7 @@ class DVBAdminGtk(DVBBaseAdminGtk):
                                                'volume', title=_("Volume"))
         self.nodes['Volume'] = volume
 
-        return DVBBaseAdminGtk.BaseAdminGtk.setup(self)
+        return DVBBaseAdminGtk.setup(self)
 
 class MpegTSDecoderAdminGtk(admin_gtk.BaseAdminGtk):
     def setup(self):
@@ -261,4 +262,8 @@ class MpegTSDecoderAdminGtk(admin_gtk.BaseAdminGtk):
                                                'volume', title=_("Volume"))
         self.nodes['Volume'] = volume
 
-        return admin_gtk.BaseAdminGtk.setup(self)        
+        return admin_gtk.BaseAdminGtk.setup(self)
+
+class MpegTSSplitterAdminGtk(admin_gtk.BaseAdminGtk):
+    def setup(self):
+        return admin_gtk.BaseAdminGtk.setup(self)
