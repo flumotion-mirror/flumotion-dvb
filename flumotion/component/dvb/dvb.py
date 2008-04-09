@@ -293,15 +293,15 @@ class DVB(DVBTSProducer):
     def get_pipeline_string(self, props):
         dvbsrc_template = self.get_dvbsrc_pipeline_string(props)
         decode_template = get_decode_pipeline_string(props)
-        template = "%s ! tee name=t ! " \
+        template = "%s ! tee name=mpegtst ! " \
             "queue max-size-time=0 max-size-buffers=0 ! %s" \
-            " t. ! queue max-size-time=0 max-size-buffers=0 ! " \
+            " mpegtst. ! queue max-size-time=0 max-size-buffers=0 ! " \
             "@feeder:mpegts@" % (dvbsrc_template, decode_template)
         return template
 
     
     def configure_pipeline(self, pipeline, properties):
-        super(DVBTSProducer, self).configure_pipeline()
+        super(DVBTSProducer, self).configure_pipeline(pipeline, properties)
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
