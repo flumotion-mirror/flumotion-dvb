@@ -1,3 +1,24 @@
+2008-07-23  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* configure.ac:
+	Depend on newer flumotion due to wizard stuff.
+	* flumotion/component/dvb/Makefile.am:
+	* flumotion/component/dvb/admin_gtk.py:
+	Fix for move of class.
+	* flumotion/component/dvb/dvb.py:
+	Fix for move of function.
+	* flumotion/component/dvb/dvb.xml:
+	* flumotion/component/dvb/dvbchecks.py:
+	* flumotion/component/dvb/wizard_gtk.py:
+	* flumotion/component/dvb/dvbchecks.py (added):
+	* flumotion/component/dvb/dvb-probe-channels.glade (added):
+	* flumotion/component/dvb/dvb-antenna.glade (added):
+	* flumotion/component/dvb/dvb-select-channel.glade (added):
+	* flumotion/component/dvb/wizard_gtk.py (added):
+	* flumotion/component/dvb/dvb-video-config.glade (added):
+	Added wizard code for DVB. Now can do a wizard with DVB video.
+	Audio not working yet.
+
 2008-04-09  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/admin_gtk.py:

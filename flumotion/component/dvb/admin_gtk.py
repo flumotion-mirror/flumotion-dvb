@@ -21,7 +21,8 @@
 
 from gettext import gettext as _
 
-from flumotion.component.base import admin_gtk
+from flumotion.component.base.admin_gtk import BaseAdminGtk
+from flumotion.component.base.baseadminnode import BaseAdminGtkNode
 from flumotion.component.effects.volume import admin_gtk as vadmin_gtk
 from kiwi.ui.objectlist import Column, ObjectList
 
@@ -91,7 +92,7 @@ class _StateWatcher(object):
                self.state.removeListener(self)
                self.state = None
 
-class SignalStatisticsAdminGtkNode(admin_gtk.BaseAdminGtkNode):
+class SignalStatisticsAdminGtkNode(BaseAdminGtkNode):
     logCategory = 'dvb'
     glade_file = 'flumotion/component/dvb/dvb.glade'
     uiStateHandlers = None
@@ -105,7 +106,7 @@ class SignalStatisticsAdminGtkNode(admin_gtk.BaseAdminGtkNode):
         self._lock = self.wtree.get_widget('value-lock')
 
     def setUIState(self, state):
-        admin_gtk.BaseAdminGtkNode.setUIState(self, state)
+        BaseAdminGtkNode.setUIState(self, state)
         if not self.uiStateHandlers:
             self.uiStateHandlers = {'signal': self.signalSet,
                                     'snr': self.snrSet,
@@ -157,7 +158,7 @@ class DVBChannel:
     def set_whatson(self, whatson):
         self.whatson = whatson
 
-class DVBServiceInformationAdminGtkNode(admin_gtk.BaseAdminGtkNode):
+class DVBServiceInformationAdminGtkNode(BaseAdminGtkNode):
     channels = {}
     siwidget = None
     def render(self):
@@ -174,12 +175,12 @@ class DVBServiceInformationAdminGtkNode(admin_gtk.BaseAdminGtkNode):
                 renderer.set_property('wrap-mode', pango.WRAP_WORD)
             self.wtree = self.siwidget
             return self.siwidget
-        d = admin_gtk.BaseAdminGtkNode.render(self)
+        d = BaseAdminGtkNode.render(self)
         d.addCallback(createWidget)
         return d
 
     def setUIState(self, state):
-        admin_gtk.BaseAdminGtkNode.setUIState(self, state)
+        BaseAdminGtkNode.setUIState(self, state)
         self._watcher = _StateWatcher(state, 
            {
                'channelnames':	self._setChannelName,
@@ -238,7 +239,7 @@ class DVBServiceInformationAdminGtkNode(admin_gtk.BaseAdminGtkNode):
     def _delWhatsOnItem(self, state, key, value):
         pass
 
-class DVBBaseAdminGtk(admin_gtk.BaseAdminGtk):
+class DVBBaseAdminGtk(BaseAdminGtk):
     def setup(self):
         dvbnode = SignalStatisticsAdminGtkNode(self.state, self.admin,
                                   title="Signal Statistics")
@@ -246,7 +247,7 @@ class DVBBaseAdminGtk(admin_gtk.BaseAdminGtk):
         channelsnode = DVBServiceInformationAdminGtkNode(self.state, self.admin,
             title="Channel Information")
         self.nodes["Channel Information"] = channelsnode
-        return admin_gtk.BaseAdminGtk.setup(self)
+        return BaseAdminGtk.setup(self)
 
 class DVBAdminGtk(DVBBaseAdminGtk):
     def setup(self):
@@ -256,14 +257,14 @@ class DVBAdminGtk(DVBBaseAdminGtk):
 
         return DVBBaseAdminGtk.setup(self)
 
-class MpegTSDecoderAdminGtk(admin_gtk.BaseAdminGtk):
+class MpegTSDecoderAdminGtk(BaseAdminGtk):
     def setup(self):
         volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
                                                'volume', title=_("Volume"))
         self.nodes['Volume'] = volume
 
-        return admin_gtk.BaseAdminGtk.setup(self)
+        return BaseAdminGtk.setup(self)
 
-class MpegTSSplitterAdminGtk(admin_gtk.BaseAdminGtk):
+class MpegTSSplitterAdminGtk(BaseAdminGtk):
     def setup(self):
-        return admin_gtk.BaseAdminGtk.setup(self)
+        return BaseAdminGtk.setup(self)
