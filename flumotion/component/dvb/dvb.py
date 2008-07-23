@@ -25,8 +25,8 @@ from twisted.internet import defer
 from flumotion.component.effects.volume import volume
 import gst
 from flumotion.common import messages
-from flumotion.common.messages import N_
-T_ = messages.gettexter('flumotion')
+from flumotion.common.i18n import N_, gettexter
+T_ = gettexter('flumotion')
 
 
 def get_decode_pipeline_string(props):
