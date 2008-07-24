@@ -77,8 +77,32 @@ def getTerrestrialLocations():
 
     @rtype: L{twisted.internet.defer.Deferred}
     """
+    # FIXME: allow translation
+    # countries not taken from iso xml file because the country codes used
+    #
+    countries = { "at": "Austria", "au": "Australia", "be": "Belgium",
+        "ch": "Switzerland", "cz": "Czech Republic", "de": "Germany",
+        "dk": "Denmark", "es": "Spain", "fi": "Finland", "fr": "France",
+        "gr": "Greece", "hr": "Hungary", "is": "Iceland", "it": "Italy",
+        "lu": "Luxemburg", "nl": "Netherlands", "nz": "New Zealand",
+        "pl": "Poland", "se": "Sweden", "sk": "Slovakia", "tw": "Taiwan",
+        "uk": "United Kingdom" }
+
     def splitLocation(location):
         return string.split(location, "-", maxsplit=1)
+    def camelCaseToTitleCase(location):
+        # antennae are listed as eg CrystalPalace not Crystal Palace
+        # so convert
+        # there has to be a decent regex to convert upper camel case to 
+        # title case
+        newlocation = location[0]
+        for l in location[1:]:
+            if l.isupper():
+                newlocation = "%s %s" % (newlocation, l)
+            else:
+                newlocation = "%s%s" % (newlocation, l)
+        return newlocation
+
     result = messages.Result()
     locations = {}
     for path in ["/usr/share/dvb", "/usr/share/dvb-apps", 
@@ -89,6 +113,8 @@ def getTerrestrialLocations():
                 city = ""
                 try:
                     country, city = splitLocation(f)
+                    country = countries[country]
+                    city = camelCaseToTitleCase(city)
                 except Exception, e:
                     city = f
                 if not locations.has_key(country):
