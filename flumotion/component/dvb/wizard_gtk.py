@@ -85,15 +85,18 @@ class DVBProducer(AudioProducer, VideoProducer):
             self.properties.guard = ts["guard-interval"]
             self.properties.hierarchy = ts["hierarchy"]
             self.properties.trans_mode = int(ts["transmission-mode"][0])
-            self.properties.code_rate_hp = self._parseCodeRate(ts["code-rate-hp"])
-            self.properties.code_rate_lp = self._parseCodeRate(ts["code-rate-lp"])
+            self.properties.code_rate_hp = self._parseCodeRate(
+                ts["code-rate-hp"])
+            self.properties.code_rate_lp = self._parseCodeRate(
+                ts["code-rate-lp"])
         elif dvbType == "S":
             self.properties.polarity = ts["polarization"]
         elif dvbType == "C":
             self.properties.inversion = "AUTO"
 
         if dvbType != 'S':
-            self.properties.modulation = self._parseModulation(ts["constellation"])
+            self.properties.modulation = self._parseModulation(
+                ts["constellation"])
 
         if dvbType != 'T':
             self.properties.symbol_rate = ts["symbol-rate"]
@@ -123,7 +126,6 @@ class DVBAntennaStep(VideoProducerStep):
     gladeFile = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'dvb-antenna.glade')
     section = _('Production')
-
 
     def __init__(self, wizard, model):
         # evil hack to remove need to duplicate getNext code in VideoProducer
