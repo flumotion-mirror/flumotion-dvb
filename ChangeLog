@@ -1,3 +1,9 @@
+2008-07-24  Johan Dahlin  <johan@gnome.org>
+
+	* flumotion/component/dvb/wizard_gtk.py:
+	Clean up the wizard a bit further, to make the code closer
+	to the other pages.
+
 2008-07-23  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* configure.ac:
