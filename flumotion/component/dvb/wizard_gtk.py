@@ -22,6 +22,7 @@ import gettext
 import os
 
 from kiwi.ui.objectlist import Column, ObjectList
+from twisted.internet import reactor
 from zope.interface import implements
 
 from flumotion.common import messages
@@ -177,7 +178,6 @@ class DVBAntennaStep(VideoProducerStep):
     def _updateCountries(self):
         # FIXME: add specific code for dvb-s, dvb-c, atsc etc.
         # eg hide country
-        # FIXME: get friendly country names
         adapter = self.adapter.get_selected()
         if adapter is None:
             return
@@ -190,7 +190,6 @@ class DVBAntennaStep(VideoProducerStep):
             self.country.prefill(countries)
 
     def _updateAntenna(self):
-        # FIXME: transform camel case titles to have spaces
         country = self.country.get_selected()
         if country is None:
             return
@@ -234,15 +233,18 @@ class DVBProbeChannelsStep(WizardStep):
     # Private API
 
     def _runChecks(self):
-        # FIXME: pulse regularly, change label to say what we are doing
+        # FIXME: change label to say what we are doing
         print "Worker %s" % self.model.worker
         print "Adapter %r" % (self.model.adapterNumber,)
         print "Antenna %r" % (self.model.antenna,)
+        def pulseProgressBar():
+            self.progress.pulse()
+            self._pulseCallLaterId = reactor.callLater(5, pulseProgressBar)
         d = self.wizard.runInWorker(self.model.worker,
             "flumotion.component.dvb.dvbchecks", "getInitialTuning",
             self.model.dvbtype, self.model.antenna)
         def receivedInitialTuningData(initialTuning):
-            self.progress.pulse()
+            pulseProgressBar()
             print "Initial tuning: %r" % (initialTuning,)
             # now we need to do the scanning
             for freq in initialTuning:
@@ -254,6 +256,7 @@ class DVBProbeChannelsStep(WizardStep):
     def _scan(self):
         if not self._frequenciesToScan:
             print "Finished scanning"
+            self._pulseCallLaterId.cancel()
             return
         f = None
         while True:
