@@ -21,24 +21,25 @@
 import gettext
 import os
 
+import gobject
 from kiwi.ui.objectlist import Column, ObjectList
 from twisted.internet import reactor
 from zope.interface import implements
 
+from flumotion.admin.assistant.interfaces import IProducerPlugin
+from flumotion.admin.assistant.models import VideoProducer, AudioProducer, \
+     VideoConverter, AudioEncoder, VideoEncoder
 from flumotion.common import messages
 from flumotion.common.i18n import gettexter, N_
 from flumotion.ui.wizard import WizardStep
-from flumotion.wizard.interfaces import IProducerPlugin
-from flumotion.wizard.models import VideoProducer, AudioProducer, \
-     VideoConverter, AudioEncoder, VideoEncoder
 from flumotion.wizard.basesteps import VideoProducerStep
 
 T_ = gettexter('flumotion')
 _ = gettext.gettext
 
 
-# for kiwi ObjectList
 class DVBChannel:
+
     def __init__(self, sid, chandata):
         self.service_id = sid
         self.name = chandata.get('name', 'Unknown')
@@ -50,6 +51,7 @@ class DVBChannel:
 
 class DVBProducer(AudioProducer, VideoProducer):
     componentType = 'dvb-producer'
+
     def __init__(self):
         super(DVBProducer, self).__init__()
 
@@ -182,7 +184,7 @@ class DVBAntennaStep(VideoProducerStep):
         if adapter is None:
             return
         dvbType = adapter[0]
-        print "Adapter type: %r" % (adapter,)
+        print "Adapter type: %r" % (adapter, )
         if dvbType == 'DVB-T':
             # This code will break in python 3, need to do an explicit copy
             countries = self._terrestrialLocations.keys()
@@ -217,6 +219,7 @@ class DVBProbeChannelsStep(WizardStep):
         self.model = model
         self._frequenciesToScan = []
         self._frequenciesAlreadyScanned = []
+        self._pulseCallLaterId = -1
         super(DVBProbeChannelsStep, self).__init__(wizard)
 
     # WizardStep
@@ -225,6 +228,7 @@ class DVBProbeChannelsStep(WizardStep):
         self.model.channels = {}
         self.model.transportStreams = {}
 
+        self.progress.set_pulse_step(0.05)
         self._runChecks()
 
     def getNext(self):
@@ -235,17 +239,15 @@ class DVBProbeChannelsStep(WizardStep):
     def _runChecks(self):
         # FIXME: change label to say what we are doing
         print "Worker %s" % self.model.worker
-        print "Adapter %r" % (self.model.adapterNumber,)
-        print "Antenna %r" % (self.model.antenna,)
-        def pulseProgressBar():
-            self.progress.pulse()
-            self._pulseCallLaterId = reactor.callLater(5, pulseProgressBar)
+        print "Adapter %r" % (self.model.adapterNumber, )
+        print "Antenna %r" % (self.model.antenna, )
         d = self.wizard.runInWorker(self.model.worker,
             "flumotion.component.dvb.dvbchecks", "getInitialTuning",
             self.model.dvbtype, self.model.antenna)
+
         def receivedInitialTuningData(initialTuning):
-            pulseProgressBar()
-            print "Initial tuning: %r" % (initialTuning,)
+            self._startPulseProgressBar()
+            print "Initial tuning: %r" % (initialTuning, )
             # now we need to do the scanning
             for freq in initialTuning:
                 self._frequenciesToScan.append(freq)
@@ -253,10 +255,27 @@ class DVBProbeChannelsStep(WizardStep):
         d.addCallback(receivedInitialTuningData)
         return d
 
+    def _pulseProgressBar(self):
+        self.progress.pulse()
+        return True
+
+    def _startPulseProgressBar(self):
+        self._pulseCallLaterId = gobject.timeout_add(
+            100, self._pulseProgressBar)
+
+    def _finishedScanning(self):
+        if self._pulseCallLaterId != -1:
+            gobject.source_remove(self._pulseCallLaterId)
+            self._pulseCallLaterId = -1
+
+        self.progress.set_fraction(0)
+        if not self.model.channels:
+            self.wizard.blockNext(True)
+            self.label.set_text(_("No channels found"))
+
     def _scan(self):
         if not self._frequenciesToScan:
-            print "Finished scanning"
-            self._pulseCallLaterId.cancel()
+            self._finishedScanning()
             return
         f = None
         while True:
@@ -268,19 +287,22 @@ class DVBProbeChannelsStep(WizardStep):
                 break
             f = None
         if not f:
-            print "Finished scanning"
+            self._finishedScanning()
             return
         print "..Frequencies scanned already: %r" % (
-                    self._frequenciesAlreadyScanned,)
-        print "Scanning %r" % (f,)
-        d = self.wizard.runInWorker(self.worker, "flumotion.component.dvb.dvbchecks",
+                    self._frequenciesAlreadyScanned, )
+        print "Scanning %r" % (f, )
+        d = self.wizard.runInWorker(
+            self.worker,
+            "flumotion.component.dvb.dvbchecks",
             "scan", self.model.adapterNumber, self.model.dvbtype, f)
+
         def frequencyScanned((channels, moreFrequencies)):
             print "Frequency scanned"
             for sid, channel in channels.items():
                 chanData = self.model.channels.setdefault(sid, {})
                 chanData.update(channel)
-                print "Channel %r added with data: %r" % (sid,chanData)
+                print "Channel %r added with data: %r" % (sid, chanData)
             # add frequency just scanned to frequencies_already_scanned
             key = f["frequency"], f.get('polarization')
             self._frequenciesAlreadyScanned.append(key)
@@ -289,13 +311,13 @@ class DVBProbeChannelsStep(WizardStep):
                 key = freq["frequency"], freq.get('polarization')
                 if key in self._frequenciesAlreadyScanned:
                     continue
-                print "Delivery: %r" % (freq,)
-                print "Key: %r" % (key,)
+                print "Delivery: %r" % (freq, )
+                print "Key: %r" % (key, )
                 print "Frequencies scanned already: %r" % (
-                    self._frequenciesAlreadyScanned,)
+                    self._frequenciesAlreadyScanned, )
                 self._frequenciesToScan.append(freq)
             print ".Frequencies scanned already: %r" % (
-                    self._frequenciesAlreadyScanned,)
+                    self._frequenciesAlreadyScanned, )
 
             return self._scan()
         d.addCallback(frequencyScanned)
@@ -318,7 +340,7 @@ class DVBSelectChannelStep(WizardStep):
         self.channels = ObjectList([
             Column('service_id', title='Program number'),
             Column('name', title='Channel name', sorted=True)])
-        for sid,chandata in self.model.channels.items():
+        for sid, chandata in self.model.channels.items():
             self.channels.append(DVBChannel(sid, chandata))
         self.main_vbox.add(self.channels)
         self.channels.show()
@@ -339,7 +361,6 @@ class DVBVideoConfig(WizardStep):
     gladeFile = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         'dvb-video-config.glade')
     section = _('Production')
-
 
     def __init__(self, wizard, model):
         self.model = model
@@ -366,5 +387,3 @@ class DVBWizardPlugin(object):
 
     def getProductionStep(self, type):
         return DVBAntennaStep(self.wizard, self.model)
-
-
