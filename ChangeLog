@@ -1,5 +1,11 @@
 2008-08-19  Johan Dahlin  <johan@gnome.org>
 
+	* flumotion/component/dvb/dvbchecks.py:
+	Remove - and _ from city names. Remove trailing whitespace
+	and make comform to pep8.py
+
+2008-08-19  Johan Dahlin  <johan@gnome.org>
+
 	* flumotion/component/dvb/dvb-probe-channels.glade:
 	* flumotion/component/dvb/wizard_gtk.py:
 	Some minor style fixes.
