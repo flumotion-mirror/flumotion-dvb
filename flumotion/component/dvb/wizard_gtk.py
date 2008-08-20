@@ -32,7 +32,7 @@ from flumotion.admin.assistant.models import VideoProducer, AudioProducer, \
 from flumotion.common import messages
 from flumotion.common.i18n import gettexter, N_
 from flumotion.ui.wizard import WizardStep
-from flumotion.wizard.basesteps import VideoProducerStep
+from flumotion.admin.gtk.basesteps import VideoProducerStep
 
 T_ = gettexter('flumotion')
 _ = gettext.gettext
