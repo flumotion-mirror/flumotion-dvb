@@ -1,7 +1,7 @@
 AC_INIT(README)
 
-AS_VERSION(flumotion-dvb, FT, 0, 4, 1, 1)
-AC_SUBST(RELEASE, $FT_RELEASE)
+AS_VERSION(flumotion-dvb, FDVB, 0, 5, 0, 1)
+AC_SUBST(RELEASE, $FDVB_RELEASE)
 
 AC_SUBST_FILE(AUTHORS)
 AUTHORS=$srcdir/AUTHORS
@@ -57,6 +57,8 @@ PREAMBLE=`cat $srcdir/misc/preamble.py`
 dnl output stuff
 FLUMOTION_SETUP(flumotion/test/setup.py, $FLUMOTION_DIR, $PREAMBLE, dvb)
 FLUMOTION_SETUP(misc/setup.py, $FLUMOTION_DIR, $PREAMBLE, dvb)
+
+AC_CONFIG_FILES([env], [chmod +x env])
 
 dnl output stuff
 AC_OUTPUT(
