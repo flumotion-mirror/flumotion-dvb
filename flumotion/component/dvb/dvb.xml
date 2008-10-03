@@ -145,6 +145,9 @@
 	<property name="framerate" type="fraction" />
 	<property name="pixel-aspect-ratio" type="fraction" />
 	<property name="deinterlacer" type="string" />
+	<property name="has-video" type="bool" required="false" />
+	<property name="video-decoder" type="string" />
+	<property name="audio-decoder" type="string" />
       </properties>
     </component>
 
