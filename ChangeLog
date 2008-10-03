@@ -1,3 +1,14 @@
+2008-10-03  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* flumotion/test/Makefile.am:
+	  Set TRIAL_ENV.
+	* Makefile.am:
+	* env (deleted):
+	* env.in: (added)
+	  Generate env.
+	* configure.ac:
+	  bump to 0.5
+
 2008-10-03  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.xml:
