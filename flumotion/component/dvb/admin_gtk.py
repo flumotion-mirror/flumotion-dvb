@@ -98,7 +98,7 @@ class _StateWatcher(object):
 
 class SignalStatisticsAdminGtkNode(BaseAdminGtkNode):
     logCategory = 'dvb'
-    glade_file = 'flumotion/component/dvb/dvb.glade'
+    gladeFile = 'flumotion/component/dvb/dvb.glade'
     uiStateHandlers = None
 
     def haveWidgetTree(self):
