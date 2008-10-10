@@ -171,21 +171,21 @@ class DVBServiceInformationAdminGtkNode(BaseAdminGtkNode):
 
     def render(self):
 
-        def createWidget(res):
-            self.siwidget = ObjectList([Column('programnumber',
-                'Program Number', data_type=str),
-                Column('name', data_type=str),
-                Column('whatson', 'What\'s On', data_type=str)])
-            whatsontvcolumn = self.siwidget.get_treeview_column(\
-                self.siwidget.get_column_by_name('whatson'))
-            import pango
-            for renderer in whatsontvcolumn.get_cell_renderers():
-                renderer.set_property('wrap-width', 200)
-                renderer.set_property('wrap-mode', pango.WRAP_WORD)
-            self.widget = self.siwidget
+        def returnWidget(res):
             return self.siwidget
+        self.siwidget = ObjectList([Column('programnumber',
+            'Program Number', data_type=str),
+            Column('name', data_type=str),
+            Column('whatson', 'What\'s On', data_type=str)])
+        whatsontvcolumn = self.siwidget.get_treeview_column(\
+            self.siwidget.get_column_by_name('whatson'))
+        import pango
+        for renderer in whatsontvcolumn.get_cell_renderers():
+            renderer.set_property('wrap-width', 200)
+            renderer.set_property('wrap-mode', pango.WRAP_WORD)
+        self.widget = self.siwidget
         d = BaseAdminGtkNode.render(self)
-        d.addCallback(createWidget)
+        d.addCallback(returnWidget)
         return d
 
     def setUIState(self, state):
