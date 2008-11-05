@@ -1,3 +1,10 @@
+2008-11-05  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.py:
+	Fix due to changes in gst-python/gstreamer.
+	* flumotion/component/dvb/dvbchecks.py:
+	General cleanup ( + extra debug )
+
 2008-10-10  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/admin_gtk.py:
