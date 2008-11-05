@@ -26,9 +26,7 @@ import gobject
 import gst
 from twisted.internet import defer
 
-from flumotion.common import gstreamer, log, messages
-from flumotion.worker.checks import check
-from flumotion.worker.checks.gst010 import do_element_check
+from flumotion.common import log, messages
 
 __version__ = "$Rev: 6883 $"
 
@@ -161,13 +159,16 @@ def getInitialTuning(adapterType, initialTuningFile):
         return result
 
     for line in open(initialTuningFile, "r"):
+        log.debug('check', 'line in file: %s' % line)
+
         if not line:
             break
         if line[0] == '#':
             continue
         params = line[:-1].split(" ")
+
         if params[0] == "T" and adapterType == "DVB-T":
-            if len(params) != 9:
+            if len(params) < 9:
                 continue
             d = {"frequency": int(params[1]),
                  "bandwidth": int(params[2][0]),
@@ -221,6 +222,7 @@ class DVBScanner:
         self.pat_arrived = False
         self.check_for_lock_event_id = None
         self.wait_for_tables_event_id = None
+        self.tables_arrived = False
         self.scanning_complete_cb = scanning_complete_cb
         self.channel_added_cb = channel_added_cb
 
@@ -235,22 +237,29 @@ class DVBScanner:
         self.pipeline.get_state()
 
     def wait_for_tables(self):
-        self.pipeline.set_state(gst.STATE_READY)
-        self.pipeline.get_state()
-        self.locked = False
-        self.scanned = False
-        if self.scanning_complete_cb:
-            self.scanning_complete_cb()
+        if not self.tables_arrived:
+            self.tables_arrived = True
+            self.pipeline.set_state(gst.STATE_READY)
+            self.pipeline.get_state()
+            self.locked = False
+            self.scanned = False
+            if self.wait_for_tables_event_id:
+                gobject.source_remove(self.wait_for_tables_event_id)
+                self.wait_for_tables_event_id = None
+                if self.scanning_complete_cb:
+                    self.scanning_complete_cb()
 
     def check_for_lock(self):
         if not self.locked:
+            print "No Lock!"
             self.pipeline.set_state(gst.STATE_READY)
-        # block until state change completed
-        self.pipeline.get_state()
-        self.scanned = False
+            # block until state change completed
+            self.pipeline.get_state()
+            print "Pipeline now ready"
+            self.scanned = False
 
-        self.scanning_complete_cb()
-        return False
+            self.scanning_complete_cb()
+            return False
 
     def have_dvb_adapter_type(self, type):
         self.adaptertype = type
@@ -266,8 +275,9 @@ class DVBScanner:
             elif message.structure.get_name() == 'dvb-frontend-stats':
                 s = message.structure
                 if s["lock"] and not self.locked:
+                    print "LOCKED!"
                     self.locked = True
-                    gobject.source_remove(self.check_for_lock_event_id)
+                    gobject.source_remove(self. check_for_lock_event_id)
                     self.check_for_lock_event_id = None
                     self.wait_for_tables_event_id = gobject.timeout_add(
                         10*1000,
@@ -276,11 +286,9 @@ class DVBScanner:
                 if self.check_for_lock_event_id:
                     gobject.source_remove(self.check_for_lock_event_id)
                     self.check_for_lock_event_id = None
-                if self.wait_for_tables_event_id:
-                    gobject.source_remove(self.wait_for_tables_event_id)
-                    self.wait_for_tables_event_id = None
                 self.wait_for_tables()
             elif message.structure.get_name() == 'sdt':
+                print "SDT"
                 s = message.structure
                 services = s["services"]
                 tsid = s["transport-stream-id"]
@@ -288,8 +296,9 @@ class DVBScanner:
                 if actual:
                     for service in services:
                         name = service.get_name()
+                        print "Name: %s Structure: %r" % (name, service)
                         sid = int(name[8:])
-                        if "name" in service:
+                        if service.has_field("name"):
                             name = service["name"]
                         if sid in self.channels:
                             self.channels[sid]["name"] = name
@@ -304,19 +313,20 @@ class DVBScanner:
                     self.sdt_arrived = True
 
             elif message.structure.get_name() == 'nit':
+                print "NIT"
                 s = message.structure
                 name = s["network-id"]
                 actual = s["actual-network"]
-                if "network-name" in s:
+                if s.has_field("network-name"):
                     name = s["network-name"]
                 transports = s["transports"]
                 for transport in transports:
                     tsid = transport["transport-stream-id"]
-                    if not "delivery" in transport:
+                    if not transport.has_field("delivery"):
                         continue
                     delivery = transport["delivery"]
                     self.transport_streams[tsid] = dict(delivery)
-                    if not "channels" in transport:
+                    if not transport.has_field("channels"):
                         continue
                     chans = transport["channels"]
                     for chan in chans:
@@ -341,7 +351,6 @@ class DVBScanner:
                 self.pat_arrived = True
 
         if self.sdt_arrived and self.nit_arrived and self.pat_arrived:
-            gobject.source_remove(self.wait_for_tables_event_id)
             self.wait_for_tables()
 
     def scan(self, tuning_params):
@@ -422,111 +431,13 @@ def scan(adapterNumber, dvbType, tuningInfo):
     def scanningComplete():
         print "Scanning complete"
         result = messages.Result()
-        result.succeed((scanner.channels, scanner.transport_streams))
+        print "channels: %r ts: %r" % (scanner.channels,
+            scanner.transport_streams)
+        result.succeed((scanner.channels, scanner.transport_streams.values()))
         d.callback(result)
 
     scanner = DVBScanner(adapter=adapterNumber,
         scanning_complete_cb=scanningComplete)
     scanner.adaptertype = dvbType
     scanner.scan(tuningInfo)
-    return d
-
-
-def checkWebcam(device, id):
-    """
-    Probe the given device node as a webcam.
-
-    The result is either:
-     - succesful, with a None value: no device found
-     - succesful, with a tuple:
-                  - device name
-                  - dict of mime, format, width, height, fps pair
-     - failed
-
-    @rtype: L{flumotion.common.messages.Result}
-    """
-    # FIXME: add code that checks permissions and ownership on errors,
-    # so that we can offer helpful hints on what to do.
-
-    def probeDevice(element):
-        name = element.get_property('device-name')
-        caps = element.get_pad("src").get_caps()
-        log.debug('check', 'caps: %s' % caps.to_string())
-
-        sizes = {} # (width, height) => [{'framerate': (framerate_num,
-                   #                                    framerate_denom),
-                   #                      'mime': str,
-                   #                      'fourcc': fourcc}]
-
-        def forAllStructValues(struct, key, proc):
-            vals = struct[key]
-            if isinstance(vals, list):
-                for val in vals:
-                    proc(struct, val)
-            elif isinstance(vals, gst.IntRange):
-                val = vals.low
-                while val < vals.high:
-                    proc(struct, val)
-                    val *= 2
-                proc(struct, vals.high)
-            elif isinstance(vals, gst.DoubleRange):
-                # hack :)
-                proc(struct, vals.high)
-            elif isinstance(vals, gst.FractionRange):
-                # hack :)
-                proc(struct, vals.high)
-            else:
-                # scalar
-                proc(struct, vals)
-
-        def addRatesForWidth(struct, width):
-
-            def addRatesForHeight(struct, height):
-
-                def addRate(struct, rate):
-                    if (width, height) not in sizes:
-                        sizes[(width, height)] = []
-                    d = {'framerate': (rate.num, rate.denom),
-                         'mime': struct.get_name()}
-                    if 'yuv' in d['mime']:
-                        d['format'] = struct['format'].fourcc
-                    sizes[(width, height)].append(d)
-                forAllStructValues(struct, 'framerate', addRate)
-            forAllStructValues(struct, 'height', addRatesForHeight)
-        for struct in caps:
-            if 'yuv' not in struct.get_name():
-                continue
-            forAllStructValues(struct, 'width', addRatesForWidth)
-
-        return (name, element.get_factory().get_name(), sizes)
-
-    def tryV4L2():
-        log.debug('webcam', 'trying v4l2')
-        version = gstreamer.get_plugin_version('video4linux2')
-        minVersion = (0, 10, 5, 1)
-        if not version or version < minVersion:
-            log.info('webcam', 'v4l2 version %r too old (need >=%r)',
-                     version, minVersion)
-            return defer.fail(NotImplementedError())
-
-        pipeline = 'v4l2src name=source device=%s ! fakesink' % (device, )
-        d = do_element_check(pipeline, 'source', probeDevice,
-                             state=gst.STATE_PAUSED, set_state_deferred=True)
-        return d
-
-    def tryV4L1(_):
-        log.debug('webcam', 'trying v4l1')
-        pipeline = 'v4lsrc name=source device=%s ! fakesink' % (device, )
-        d = do_element_check(pipeline, 'source', probeDevice,
-                             state=gst.STATE_PAUSED, set_state_deferred=True)
-        return d
-
-    result = messages.Result()
-
-    d = tryV4L2()
-    d.addErrback(tryV4L1)
-    d.addCallback(check.callbackResult, result)
-    d.addErrback(check.errbackNotFoundResult, result, id, device)
-    d.addErrback(check.errbackResult, result, id, device)
-
     return d

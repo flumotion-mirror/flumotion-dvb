@@ -257,7 +257,7 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
                 for service in services:
                     name = service.get_name()
                     sid = name[8:]
-                    if "name" in service:
+                    if service.has_field("name"):
                         name = service["name"]
                     if sid in self.program_numbers:
                         self.debug("Setting channel %s to have name %s",
@@ -273,16 +273,16 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
                         txt = "%d/%d/%d %d:%d (%d minutes)" % (
                             e["day"], e["month"], e["year"], e["hour"],
                             e["minute"], e["duration"]/60)
-                        if "name" in e:
+                        if e.has_field("name"):
                             txt = "%s %s" % (txt, e["name"])
-                        if "description" in e:
+                        if e.has_field("description"):
                             txt = "%s: %s" % (txt, e["description"])
                         self.debug("Now on channel %s: %s",
                             str(s["service-id"]), txt)
                         self.uiState.setitem('whatson', str(s["service-id"]),
                             txt)
                     name = "None"
-                    if "name" in e:
+                    if e.has_field("name"):
                         name = e["name"]
                     self.debug("event %s of running status: %d",
                         name,
