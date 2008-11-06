@@ -70,12 +70,15 @@ def getListOfAdaptersWithTypes():
     return result
 
 
-def getTerrestrialLocations():
+def getAntennaeLocations():
     """
-    Find from the system to find locations where initial tuning data is
+    Find from the system to find antennae where initial tuning data is
     available.
-    Returns a dict with country -> list of (city, absolute filename)
-
+    Returns a dict with adapter type -> antennae
+    where if adapter type is DVB-T antennae is:
+       country -> list of (city, absolute filename)
+    and if adapter type is DVB-S antennae is:
+       list of satellites
     @rtype: L{twisted.internet.defer.Deferred}
     """
     # FIXME: allow translation
@@ -126,6 +129,7 @@ def getTerrestrialLocations():
 
     result = messages.Result()
     locations = {}
+    terrestrialLocations = {}
     for path in ["/usr/share/dvb",
                  "/usr/share/dvb-apps",
                  "/usr/share/doc/dvb-utils/examples/scan"]:
@@ -140,8 +144,18 @@ def getTerrestrialLocations():
                 except Exception, e:
                     city = f
                 print "Adding country %s city %s" % (country, city)
-                locations.setdefault(country, []).append(
+                terrestrialLocations.setdefault(country, []).append(
                     (city, os.path.join(path, 'dvb-t', f)))
+    locations["DVB-T"] = terrestrialLocations
+    # now do satellite
+    satellites = []
+    for path in ["/usr/share/dvb",
+                 "/usr/share/dvb-apps",
+                 "/usr/share/doc/dvb-utils/examples/scan"]:
+        if os.path.exists(path):
+            for f in os.listdir(os.path.join(path, 'dvb-s')):
+                satellites.append((f, os.path.join(path, 'dvb-s', f)))
+    locations["DVB-S"] = satellites
 
     result.succeed(locations)
     return result
@@ -433,7 +447,7 @@ def scan(adapterNumber, dvbType, tuningInfo):
         result = messages.Result()
         print "channels: %r ts: %r" % (scanner.channels,
             scanner.transport_streams)
-        result.succeed((scanner.channels, scanner.transport_streams.values()))
+        result.succeed((scanner.channels, scanner.transport_streams))
         d.callback(result)
 
     scanner = DVBScanner(adapter=adapterNumber,

@@ -134,7 +134,6 @@ class DVBAntennaStep(VideoProducerStep):
         # evil hack to remove need to duplicate getNext code in VideoProducer
         # for last step in producer
         model.firstStep = self
-
         super(DVBAntennaStep, self).__init__(wizard, model)
 
     # WizardStep
@@ -161,14 +160,15 @@ class DVBAntennaStep(VideoProducerStep):
 
         def adapterListReceived(adapters):
             locationsd = self.runInWorker('flumotion.component.dvb.dvbchecks',
-                'getTerrestrialLocations')
+                'getAntennaeLocations')
             self._adapters = adapters
             locationsd.addCallback(locationsReceived)
             return locationsd
 
         def locationsReceived(locations):
             self.wizard.clear_msg('dvb-adapter-check')
-            self._terrestrialLocations = locations
+            self._terrestrialLocations = locations["DVB-T"]
+            self._satelliteLocations = locations["DVB-S"]
             self.adapter.prefill([(a[2], a) for a in self._adapters])
 
         d = self.runInWorker('flumotion.component.dvb.dvbchecks',
@@ -186,18 +186,33 @@ class DVBAntennaStep(VideoProducerStep):
         dvbType = adapter[0]
         print "Adapter type: %r" % (adapter, )
         if dvbType == 'DVB-T':
+            self.countrylabel.show()
+            self.country.show()
             # This code will break in python 3, need to do an explicit copy
             countries = self._terrestrialLocations.keys()
             countries.sort()
             self.country.prefill(countries)
+        elif dvbType == 'DVB-S':
+            self.countrylabel.hide()
+            self.country.hide()
+            self._updateAntenna()
 
     def _updateAntenna(self):
-        country = self.country.get_selected()
-        if country is None:
+        adapter = self.adapter.get_selected()
+        if adapter is None:
             return
-        antennae = self._terrestrialLocations[country]
-        antennae.sort()
-        self.antenna.prefill(antennae)
+        dvbType = adapter[0]
+        if dvbType == 'DVB-T':
+            country = self.country.get_selected()
+            if country is None:
+                return
+            antennae = self._terrestrialLocations[country]
+            antennae.sort()
+            self.antenna.prefill(antennae)
+        elif dvbType == 'DVB-S':
+            antennae = self._satelliteLocations
+            antennae.sort()
+            self.antenna.prefill(antennae)
 
     # Callbacks
 
@@ -292,6 +307,7 @@ class DVBProbeChannelsStep(WizardStep):
         print "..Frequencies scanned already: %r" % (
                     self._frequenciesAlreadyScanned, )
         print "Scanning %r" % (f, )
+        self.statuslabel.set_text("Scanning frequency %s" % (f["frequency"], ))
         d = self.wizard.runInWorker(
             self.worker,
             "flumotion.component.dvb.dvbchecks",
@@ -306,16 +322,18 @@ class DVBProbeChannelsStep(WizardStep):
             # add frequency just scanned to frequencies_already_scanned
             key = f["frequency"], f.get('polarization')
             self._frequenciesAlreadyScanned.append(key)
-            for tsid, freq in moreFrequencies.items():
-                self.model.transportStreams[tsid] = freq
-                key = freq["frequency"], freq.get('polarization')
+            for tsid in moreFrequencies:
+                tuningparams = moreFrequencies[tsid]
+                self.model.transportStreams[tsid] = tuningparams
+                key = tuningparams["frequency"], \
+                    tuningparams.get('polarization')
                 if key in self._frequenciesAlreadyScanned:
                     continue
-                print "Delivery: %r" % (freq, )
+                print "Delivery: %r" % (tuningparams, )
                 print "Key: %r" % (key, )
                 print "Frequencies scanned already: %r" % (
                     self._frequenciesAlreadyScanned, )
-                self._frequenciesToScan.append(freq)
+                self._frequenciesToScan.append(tuningparams)
             print ".Frequencies scanned already: %r" % (
                     self._frequenciesAlreadyScanned, )
 

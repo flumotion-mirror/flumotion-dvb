@@ -1,3 +1,13 @@
+2008-11-06  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb-probe-channels.glade:
+	* flumotion/component/dvb/dvbchecks.py:
+	* flumotion/component/dvb/wizard_gtk.py:
+	Peer work with Xavier Queralt.
+
+	Make wizard work with DVB-S as well as DVB-T.
+	Fix a couple of bugs stopping scanning.
+
 2008-11-05  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb.py:
