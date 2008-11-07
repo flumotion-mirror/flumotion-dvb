@@ -386,6 +386,8 @@ class DVBScanner:
                     tuning_params[param] = "NONE"
             if tuning_params["hierarchy"] == 0:
                 tuning_params["hierarchy"] = "NONE"
+            if tuning_params["transmission-mode"] == "reserved":
+                tuning_params["transmission-mode"] = "AUTO"
             dvbsrc = self.pipeline.get_by_name("dvbsrc")
             print "Frequency: %s" % (tuning_params["frequency"], )
             dvbsrc.set_property("frequency", tuning_params["frequency"])
