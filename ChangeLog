@@ -1,3 +1,8 @@
+2008-11-07  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvbchecks.py:
+	Set transmission-mode to AUTO if reserved is sent on the bus.
+
 2008-11-06  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvb-probe-channels.glade:
