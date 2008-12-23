@@ -254,7 +254,9 @@ class DVBScanner:
         if not self.tables_arrived:
             self.tables_arrived = True
             self.pipeline.set_state(gst.STATE_READY)
+            log.debug('dvbscanner', 'Setting pipeline to ready!!')
             self.pipeline.get_state()
+            log.debug('dvbscanner', 'Pipeline SET to ready!!')
             self.locked = False
             self.scanned = False
             if self.wait_for_tables_event_id:
@@ -262,6 +264,8 @@ class DVBScanner:
                 self.wait_for_tables_event_id = None
                 if self.scanning_complete_cb:
                     self.scanning_complete_cb()
+        else:
+            log.debug('dvbscanner', 'TABLES HAVE ARRIVED!!!')
 
     def check_for_lock(self):
         if not self.locked:
@@ -297,6 +301,8 @@ class DVBScanner:
                         10*1000,
                         self.wait_for_tables)
             elif message.structure.get_name() == 'dvb-read-failure':
+                log.debug("dvbscanner",
+                          "DVB READ FAILURE! Time to stop pipeline")
                 if self.check_for_lock_event_id:
                     gobject.source_remove(self.check_for_lock_event_id)
                     self.check_for_lock_event_id = None
