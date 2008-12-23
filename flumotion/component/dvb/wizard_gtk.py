@@ -80,6 +80,12 @@ class DVBProducer(AudioProducer, VideoProducer):
     # Public API
 
     def setTuningInformation(self, tsid):
+        # Should qualify that the tsid exists
+        # Not sure what we should do if it does not!
+        if not tsid in self.transportStreams:
+            print "We are in deep shit because we do not have %d" % tsid
+            for ts_id in self.transportStreams:
+                print "However we do have: %d" % ts_id
         ts = self.transportStreams[tsid]
         self.properties.frequency = ts["frequency"]
         dvbType = self.properties.dvb_type
@@ -87,7 +93,8 @@ class DVBProducer(AudioProducer, VideoProducer):
             self.properties.bandwidth = ts["bandwidth"]
             self.properties.guard = ts["guard-interval"]
             self.properties.hierarchy = ts["hierarchy"]
-            self.properties.trans_mode = int(ts["transmission-mode"][0])
+            self.properties.trans_mode = \
+                    self._parseTransmissionMode(ts["transmission-mode"])
             self.properties.code_rate_hp = self._parseCodeRate(
                 ts["code-rate-hp"])
             self.properties.code_rate_lp = self._parseCodeRate(
@@ -121,6 +128,13 @@ class DVBProducer(AudioProducer, VideoProducer):
         if codeRate == "reserved":
             codeRate = "NONE"
         return codeRate
+
+    def _parseTransmissionMode(self, transmode):
+        if transmode == "reserved":
+            transmode = "AUTO"
+        elif transmode[0] == "2" or transmode[0] == "8":
+            transmode = transmode[0]
+        return transmode
 
 
 class DVBAntennaStep(VideoProducerStep):
@@ -315,10 +329,6 @@ class DVBProbeChannelsStep(WizardStep):
 
         def frequencyScanned((channels, moreFrequencies)):
             print "Frequency scanned"
-            for sid, channel in channels.items():
-                chanData = self.model.channels.setdefault(sid, {})
-                chanData.update(channel)
-                print "Channel %r added with data: %r" % (sid, chanData)
             # add frequency just scanned to frequencies_already_scanned
             key = f["frequency"], f.get('polarization')
             self._frequenciesAlreadyScanned.append(key)
@@ -334,6 +344,24 @@ class DVBProbeChannelsStep(WizardStep):
                 print "Frequencies scanned already: %r" % (
                     self._frequenciesAlreadyScanned, )
                 self._frequenciesToScan.append(tuningparams)
+
+            for sid, channel in channels.items():
+                chanData = self.model.channels.setdefault(sid, {})
+                chanData.update(channel)
+                print "Channel %r added with data: %r" % (sid, chanData)
+                # let us fill in missing tsid tuning data for any channels
+                # that came in with this scan
+
+                # basically, if we have the tsid for the channel
+                # get the tsid of this channel
+                # see if it is already filled in self.model.transportStreams
+                # if not, fill it in
+                if "transport-stream-id" in chanData:
+                    tsid = chanData["transport-stream-id"]
+                    if not tsid in self.model.transportStreams:
+                        print "FILLING IN TSID %d with %r" % (tsid, f)
+                        self.model.transportStreams[tsid] = f
+
             print ".Frequencies scanned already: %r" % (
                     self._frequenciesAlreadyScanned, )
 

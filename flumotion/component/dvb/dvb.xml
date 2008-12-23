@@ -41,7 +41,7 @@
 	<property name="code-rate-hp" type="string" />
 	<!-- DVB-T specific properties -->
 	<property name="modulation" type="int" />
-	<property name="trans-mode" type="int" />
+	<property name="trans-mode" type="string" />
         <property name="bandwidth" type="int" />
         <property name="code-rate-lp" type="string" />
 	<property name="guard" type="int" />
