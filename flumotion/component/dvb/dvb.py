@@ -163,6 +163,10 @@ class DVBTSProducer(feedcomponent.ParseLaunchComponent):
         if self.dvb_type == "T":
             modulation = props.get('modulation')
             trans_mode = props.get('trans-mode')
+            if trans_mode == "2" or trans_mode == "8":
+                trans_mode = "%sk" % trans_mode
+            else:
+                trans_mode = "AUTO"
             bandwidth = props.get('bandwidth')
             code_rate_lp = props.get('code-rate-lp')
             code_rate_hp = props.get('code-rate-hp')
@@ -170,7 +174,7 @@ class DVBTSProducer(feedcomponent.ParseLaunchComponent):
             hierarchy = props.get('hierarchy')
             dvbsrc_template = '''
 dvbbasebin modulation="QAM %(modulation)d"
- trans-mode=%(trans_mode)dk
+ trans-mode=%(trans_mode)s
 bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
 hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,

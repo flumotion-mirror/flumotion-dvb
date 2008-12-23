@@ -1,3 +1,11 @@
+2008-12-23  Xavier Queralt Mateu  <xqueralt@flumotion.com>
+
+	* flumotion/component/dvb/dvb.py:
+	* flumotion/component/dvb/dvb.xml:
+	* flumotion/component/dvb/dvbchecks.py:
+	* flumotion/component/dvb/wizard_gtk.py:
+	Fix some scanning
+
 2008-11-07  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
 
 	* flumotion/component/dvb/dvbchecks.py:
