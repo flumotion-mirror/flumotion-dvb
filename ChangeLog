@@ -1,3 +1,8 @@
+2009-03-23  Zaheer Abbas Merali  <zaheerabbas at merali dot org>
+
+	* flumotion/component/dvb/dvb.xml:
+	Fix trailing whitespace.
+
 2008-12-23  Xavier Queralt Mateu  <xqueralt@flumotion.com>
 
 	* flumotion/component/dvb/dvb.py:

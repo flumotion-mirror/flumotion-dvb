@@ -34,7 +34,7 @@
 	<!-- S, T -->
 	<property name="device" type="string" required="false"
 		  description="Device prefix (deprecated)" />
-	<property name="adapter" type="int" required="false" 
+	<property name="adapter" type="int" required="false"
 	          description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
 	          description="Frontend number (eg 0 for frontend 0)" />
@@ -49,7 +49,7 @@
 	<!-- DVB-S specific properties -->
 	<property name="polarity" type="string" />
 	<property name="symbol-rate" type="string" />
-	<property name="satellite-number" type="int" />	
+	<property name="satellite-number" type="int" />
 	<!-- File specific properties -->
 	<property name="filename" type="string" />
 	<!-- output properties -->
@@ -83,7 +83,7 @@
 	<!-- S, T -->
 	<property name="device" type="string" required="false"
 		  description="Device prefix (deprecated)" />
-	<property name="adapter" type="int" required="false" 
+	<property name="adapter" type="int" required="false"
 	          description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
 	          description="Frontend number (eg 0 for frontend 0)" />
@@ -98,7 +98,7 @@
 	<!-- DVB-S specific properties -->
 	<property name="polarity" type="string" />
 	<property name="symbol-rate" type="string" />
-	<property name="satellite-number" type="int" />	
+	<property name="satellite-number" type="int" />
 	<!-- File specific properties -->
 	<property name="filename" type="string" />
 	<!-- output properties -->
