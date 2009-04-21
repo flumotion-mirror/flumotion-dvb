@@ -163,7 +163,7 @@ class DVBTSProducer(feedcomponent.ParseLaunchComponent):
         if self.dvb_type == "T":
             modulation = props.get('modulation')
             trans_mode = props.get('trans-mode')
-            if trans_mode == "2" or trans_mode == "8":
+            if trans_mode == 2 or trans_mode == 8:
                 trans_mode = "%sk" % trans_mode
             else:
                 trans_mode = "AUTO"
@@ -326,70 +326,6 @@ class DVB(DVBTSProducer):
         if videodecoder:
             self._pad_monitors.attach(videodecoder.get_pad('src'),
                 "videodecoder")
-
-    def _bus_message_received_cb(self, bus, message):
-        """
-        @param bus: the message bus sending the message
-        @param message: the message received
-        """
-        if message.structure.get_name() == 'dvb-frontend-stats':
-            # we have frontend stats, lets update ui state
-            s = message.structure
-            self.uiState.set('signal', s["signal"])
-            self.uiState.set('snr', s["snr"])
-            self.uiState.set('ber', s["ber"])
-            self.uiState.set('unc', s["unc"])
-            self.uiState.set('lock', s["lock"])
-        elif message.structure.get_name() == 'imperfect-timestamp':
-            identityName = message.src.get_name()
-            self.log("we have an imperfect stream from %s",
-                identityName[:-2])
-            # figure out the discontinuity
-            s = message.structure
-            expectedTimestamp = s["prev-timestamp"] + s["prev-duration"]
-            message = None
-            if s["cur-timestamp"] > expectedTimestamp + 10 * gst.SECOND:
-                message = "We had a large ( > 10 second) difference in " \
-                    "timestamps with %s" % identityName[:-2]
-            elif s["cur-timestamp"] < s["prev-timestamp"]:
-                message = "We went backwards in timestamp with %s" % (
-                    identityName[:-2], )
-            if message:
-                m = messages.Warning(T_(N_(
-                    message)),
-                id="timestamp-discont",
-                priority=40)
-                self.state.append('messages', m)
-        elif message.structure.get_name() == 'pat':
-            self.debug("PAT info received")
-            s = message.structure
-            for prog in s["programs"]:
-                self.debug("PAT: Program %d on PID 0x%04x",
-                    prog["program_number"], prog["pid"])
-        elif message.structure.get_name() == 'pmt':
-            s = message.structure
-            self.debug("PMT info received for program %d", s["program-number"])
-            for stream in s["streams"]:
-                self.debug("PMT: pid %d type: %d", stream["pid"],
-                    stream["stream-type"])
-
-    def pat_info_cb(self, sender, demux, param):
-        self.debug("PAT info received from: %s", demux.get_name())
-        pi = demux.get_property("pat-info")
-        for prog in pi:
-            self.debug("PAT: Program %d on PID 0x%04x",
-                prog.props.program_number, prog.props.pid)
-        self.debug("PAT parsing finished")
-
-    def pmt_info_cb(self, sender, demux, param):
-        pi = demux.get_property("pmt-info")
-        self.debug("PMT info for program: %d with version: %d",
-            pi.props.program_number, pi.props.version_number)
-        self.debug("PMT: PCR on PID 0x%04x", pi.props.pcr_pid)
-        for s in pi.props.stream_info:
-            self.debug("PMT: Stream on PID 0x%04x", s.props.pid)
-            for l in s.props.languages:
-                self.debug("PMT: Language %s", l)
 
     def setVolume(self, value):
         self.debug("Volume set to %d" % value)

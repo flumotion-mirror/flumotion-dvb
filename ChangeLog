@@ -3,6 +3,13 @@
 	reviewed by: Zaheer
 
 	* flumotion/component/dvb/dvb.py:
+	Fix Bug in trans-mode parameter.
+
+2009-04-21  Ricard Puig  <rpuig@flumotion.com>
+
+	reviewed by: Zaheer
+
+	* flumotion/component/dvb/dvb.py:
 	Fix bug in using super.
 	Add stats-reporting-interval so we get frontend stats again.
 
