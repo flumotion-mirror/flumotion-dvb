@@ -93,7 +93,7 @@ def get_decode_pipeline_string(props):
                     '    ! video/x-raw-yuv,framerate=%(fr)s' \
                     '    ! %(deinterlacing)s' \
                     '    ! %(scaling)s %(identity)s name=videoid ' \
-                    '    ! @feeder:video@' % dict(template=template,
+                    '    !  @feeder:video@' % dict(template=template,
                             scaling=scaling_template,
                             deinterlacing=deinterlacing_template,
                             identity=idsync_template,
@@ -177,7 +177,8 @@ dvbbasebin modulation="QAM %(modulation)d"
  trans-mode=%(trans_mode)s
 bandwidth=%(bandwidth)d code-rate-lp=%(code_rate_lp)s
 code-rate-hp=%(code_rate_hp)s guard=%(guard)d
-hierarchy=%(hierarchy)d''' % dict(modulation=modulation, trans_mode=trans_mode,
+hierarchy=%(hierarchy)d stats-reporting-interval=5000''' % dict(
+                 modulation=modulation, trans_mode=trans_mode,
                 bandwidth=bandwidth, code_rate_lp=code_rate_lp,
                 code_rate_hp=code_rate_hp,
                 guard=guard, hierarchy=hierarchy)
@@ -223,6 +224,7 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
         return template
 
     def configure_pipeline(self, pipeline, properties):
+        self.debug("Connecting to bus message handling")
         bus = pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect('message::element', self._bus_message_received_cb)
@@ -232,6 +234,7 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
         @param bus: the message bus sending the message
         @param message: the message received
         """
+        self.debug("Bus message received %r", message)
         if message.structure.get_name() == 'dvb-frontend-stats':
             # we have frontend stats, lets update ui state
             s = message.structure
@@ -308,7 +311,7 @@ class DVB(DVBTSProducer):
         return template
 
     def configure_pipeline(self, pipeline, properties):
-        super(DVBTSProducer, self).configure_pipeline(pipeline, properties)
+        super(DVB, self).configure_pipeline(pipeline, properties)
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
