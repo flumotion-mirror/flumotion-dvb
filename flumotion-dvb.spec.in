@@ -1,6 +1,6 @@
 Name:           @PACKAGE@
 Version:        @VERSION@
-Release:        @RELEASE@
+Release:        @PACKAGE_VERSION_RELEASE@%{?dist}
 Summary:        Flumotion DVB support
 
 Group:          Applications/Internet

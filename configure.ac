@@ -1,17 +1,28 @@
-AC_INIT(README)
+-*- mode: m4 -*-
 
-AS_VERSION(flumotion-dvb, FDVB, 0, 5, 1, 1)
-AC_SUBST(RELEASE, $FDVB_RELEASE)
+dnl initialize autoconf
+dnl when going to/from release please remove/add the nano (fourth number)
+dnl releases only do Wall, cvs and prerelease does Werror too
+AC_INIT(flumotion-dvb, 0.5.1.1,
+   http://https://code.fluendo.com/flumotion/trac/newticket?component=flumotion-dvb,
+   flumotion-dvb)
+
+dnl initialize automake
+AM_INIT_AUTOMAKE([-Wno-portability])
+
+dnl define PACKAGE_VERSION_* variables
+AS_VERSION
+
+AS_NANO
 
 AC_SUBST_FILE(AUTHORS)
 AUTHORS=$srcdir/AUTHORS
 
 AC_SUBST(FLU_REQ, 0.5.4)
 
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
-
 dnl Add parameters for aclocal
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I common")
+AC_CONFIG_MACRO_DIR([m4])
 
 dnl set up gettext
 dnl the version check needs to stay here because autopoint greps for it
