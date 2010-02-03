@@ -1,3 +1,11 @@
+2010-02-03  Andoni Morales Alastruey  <amorales@flumotion.com>
+
+	reviewed by: Zaheer Abbas Merali
+
+	* flumotion/component/dvb/dvb.py:
+	'program_numbers' is a colon separated list and can't
+  be printed with %d
+
 2009-09-28  Xavier Queralt  <xqueralt@flumotion.com>
 
 	* configure.ac:
