@@ -198,7 +198,7 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
         elif self.dvb_type == "FILE":
             filename = props.get('filename')
             dvbsrc_template = """filesrc location=%s name=src
-            ! mpegtsparse program-numbers=%d""" % (filename, program_numbers)
+            ! mpegtsparse program-numbers=%s""" % (filename, program_numbers)
         if self.dvb_type == "S" or self.dvb_type == "T":
             freq = props.get('frequency')
             dvbsrc_template = "%s frequency=%d program-numbers=%s name=src" % (
