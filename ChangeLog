@@ -1,3 +1,33 @@
+2010-03-01  Xavier Queralt Mateu  <xqueralt@flumotion.com>
+
+	reviewed by: Zaheer Abbas Merali
+
+	* configure.ac:
+	* env.in:
+	* flumotion/Makefile.am:
+	* flumotion/component/dvb/dvb.py:
+	* flumotion/component/dvb/dvb.xml:
+	* flumotion/component/dvb/wizard.glade:
+	* flumotion/component/dvb/wizard_gtk.py:
+	* flumotion/worker/checks/dvb.py:
+	* flumotion/component/dvb/wizard.glade (added):
+	* flumotion/worker (added):
+	* flumotion/worker/checks (added):
+	* flumotion/worker/checks/dvb.py (added):
+	* flumotion/worker/checks/__init__.py (added):
+	* flumotion/worker/checks/Makefile.am (added):
+	* flumotion/worker/checks/dvb.xml (added):
+	* flumotion/worker/__init__.py (added):
+	* flumotion/worker/Makefile.am (added):
+	* flumotion/component/dvb/dvbchecks.py (deleted):
+	* flumotion/component/dvb/dvb-probe-channels.glade (deleted):
+	* flumotion/component/dvb/dvb-antenna.glade (deleted):
+	* flumotion/component/dvb/dvb-select-channel.glade (deleted):
+	* flumotion/component/dvb/dvb-video-config.glade (deleted):
+	Merge audio-wizard branch into trunk.
+	Add support for DVB audio in wizard. At the same time, try to simplify
+	the UI. See #833
+
 2010-02-03  Andoni Morales Alastruey  <amorales@flumotion.com>
 
 	reviewed by: Zaheer Abbas Merali

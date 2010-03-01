@@ -26,7 +26,9 @@ import gobject
 import gst
 from twisted.internet import defer
 
-from flumotion.common import log, messages
+from flumotion.common import log, messages, errors
+from flumotion.worker.checks import check
+from flumotion.worker.checks.gst010 import do_element_check
 
 __version__ = "$Rev: 6883 $"
 
@@ -141,9 +143,9 @@ def getAntennaeLocations():
                     country, city = splitLocation(f)
                     country = countries[country]
                     city = camelCaseToTitleCase(city)
-                except Exception, e:
+                except Exception:
                     city = f
-                print "Adding country %s city %s" % (country, city)
+                log.debug('check', 'Adding country %s city %s', country, city)
                 terrestrialLocations.setdefault(country, []).append(
                     (city, os.path.join(path, 'dvb-t', f)))
     locations["DVB-T"] = terrestrialLocations
@@ -234,6 +236,7 @@ class DVBScanner:
         self.nit_arrived = False
         self.sdt_arrived = False
         self.pat_arrived = False
+        self.pmt_arrived = False
         self.check_for_lock_event_id = None
         self.wait_for_tables_event_id = None
         self.tables_arrived = False
@@ -241,7 +244,7 @@ class DVBScanner:
         self.channel_added_cb = channel_added_cb
 
         self.pipeline = gst.parse_launch(
-            "dvbsrc name=dvbsrc adapter=%d frontend=%d pids=0:16:17:18 "
+            "dvbsrc name=dvbsrc adapter=%d frontend=%d "
             "stats-reporting-interval=0 ! mpegtsparse ! "
             "fakesink silent=true" % (self.adapter, self.frontend))
         bus = self.pipeline.get_bus()
@@ -269,23 +272,22 @@ class DVBScanner:
 
     def check_for_lock(self):
         if not self.locked:
-            print "No Lock!"
+            log.debug('check', 'Don\'t have lock!')
             self.pipeline.set_state(gst.STATE_READY)
             # block until state change completed
             self.pipeline.get_state()
-            print "Pipeline now ready"
+            log.debug('check', 'Pipeline now ready')
             self.scanned = False
 
             self.scanning_complete_cb()
             return False
 
-    def have_dvb_adapter_type(self, type):
-        self.adaptertype = type
-        print "Adapter type is %s" % type
+    def have_dvb_adapter_type(self, atype):
+        self.adaptertype = atype
+        log.debug('check', 'Adapter type is %s', atype)
 
     def bus_watch_func(self, bus, message):
         t = message.type
-        #print "Bus watch function for message %r" % message
         if t == gst.MESSAGE_ELEMENT:
             if message.structure.get_name() == 'dvb-adapter':
                 s = message.structure
@@ -293,7 +295,7 @@ class DVBScanner:
             elif message.structure.get_name() == 'dvb-frontend-stats':
                 s = message.structure
                 if s["lock"] and not self.locked:
-                    print "LOCKED!"
+                    log.debug('check', 'Have locked!')
                     self.locked = True
                     gobject.source_remove(self. check_for_lock_event_id)
                     self.check_for_lock_event_id = None
@@ -308,7 +310,7 @@ class DVBScanner:
                     self.check_for_lock_event_id = None
                 self.wait_for_tables()
             elif message.structure.get_name() == 'sdt':
-                print "SDT"
+                log.debug('check', 'Received SDT')
                 s = message.structure
                 services = s["services"]
                 tsid = s["transport-stream-id"]
@@ -316,7 +318,8 @@ class DVBScanner:
                 if actual:
                     for service in services:
                         name = service.get_name()
-                        print "Name: %s Structure: %r" % (name, service)
+                        log.debug('check', 'Name: %s Structure: %r',
+                                  name, service)
                         sid = int(name[8:])
                         if service.has_field("name"):
                             name = service["name"]
@@ -333,7 +336,7 @@ class DVBScanner:
                     self.sdt_arrived = True
 
             elif message.structure.get_name() == 'nit':
-                print "NIT"
+                log.debug('check', 'Received NIT')
                 s = message.structure
                 name = s["network-id"]
                 actual = s["actual-network"]
@@ -360,6 +363,7 @@ class DVBScanner:
                                 chanKey: logicalChannel}
                 self.nit_arrived = True
             elif message.structure.get_name() == 'pat':
+                log.debug('check', 'Received PAT')
                 programs = message.structure["programs"]
                 for p in programs:
                     sid = p["program-number"]
@@ -369,8 +373,32 @@ class DVBScanner:
                     else:
                         self.channels[sid] = {"pmt-pid": pmt}
                 self.pat_arrived = True
+            elif message.structure.get_name() == 'pmt':
+                log.debug('check', 'Received PMT')
+                sid = message.structure['program-number']
+                streams = message.structure['streams']
+                if sid not in self.channels and streams:
+                    self.channels[sid] = {}
+                if 'audio-streams' not in self.channels[sid]:
+                    self.channels[sid]['audio-streams'] = []
+                if 'video-streams' not in self.channels[sid]:
+                    self.channels[sid]['video-streams'] = []
 
-        if self.sdt_arrived and self.nit_arrived and self.pat_arrived:
+                for s in streams:
+                    st = s['stream-type']
+                    if st in [1, 2]:
+                        self.channels[sid]['video-streams'].append(s['pid'])
+                    elif st in [3, 4]:
+                        lang = ('pid-%s' % s['pid'], s['pid'])
+                        if s.has_field('lang-code'):
+                            lang = (s['lang-code'], s['pid'])
+
+                        self.channels[sid]['audio-streams'].append(lang)
+                self.pmt_arrived = True
+
+
+        if (self.sdt_arrived and self.nit_arrived and
+            self.pat_arrived and self.pmt_arrived):
             self.wait_for_tables()
 
     def scan(self, tuning_params):
@@ -378,6 +406,7 @@ class DVBScanner:
         self.sdt_arrived = False
         self.nit_arrived = False
         self.pat_arrived = False
+        self.pmt_arrived = False
 
         if self.adaptertype == "DVB-T":
             modulation=""
@@ -395,7 +424,7 @@ class DVBScanner:
             if tuning_params["transmission-mode"] == "reserved":
                 tuning_params["transmission-mode"] = "AUTO"
             dvbsrc = self.pipeline.get_by_name("dvbsrc")
-            print "Frequency: %s" % (tuning_params["frequency"], )
+            log.debug('check', 'Frequency: %s', tuning_params["frequency"])
             dvbsrc.set_property("frequency", tuning_params["frequency"])
             dvbsrc.set_property("bandwidth", str(tuning_params["bandwidth"]))
             dvbsrc.set_property("code-rate-hp",
@@ -406,7 +435,7 @@ class DVBScanner:
                 str(tuning_params["transmission-mode"]))
             dvbsrc.set_property("guard", str(tuning_params["guard-interval"]))
             dvbsrc.set_property("hierarchy", str(tuning_params["hierarchy"]))
-            dvbsrc.set_property("modulation", modulation)
+            dvbsrc.set_property("modulation", str(modulation))
         elif self.adaptertype == "DVB-S":
             if (tuning_params["inner-fec"] == "reserved" or
                 tuning_params["inner-fec"] == "none"):
@@ -451,10 +480,10 @@ def scan(adapterNumber, dvbType, tuningInfo):
     scanner = None
 
     def scanningComplete():
-        print "Scanning complete"
+        log.debug('check', 'Scanning complete')
         result = messages.Result()
-        print "channels: %r ts: %r" % (scanner.channels,
-            scanner.transport_streams)
+        log.debug('check', 'Channels: %r ts: %r',
+                  scanner.channels, scanner.transport_streams)
         result.succeed((scanner.channels, scanner.transport_streams))
         d.callback(result)
 
@@ -462,4 +491,60 @@ def scan(adapterNumber, dvbType, tuningInfo):
         scanning_complete_cb=scanningComplete)
     scanner.adaptertype = dvbType
     scanner.scan(tuningInfo)
+    return d
+
+
+def checkDVBVideo(p, mid='check-dvb-video'):
+    """
+    @rtype: L{twisted.internet.defer.Deferred}
+    """
+    result = messages.Result()
+
+    def get_dvb_video_params(element):
+        pad = element.get_pad('src')
+
+        if pad.get_negotiated_caps() == None:
+            raise errors.GStreamerError('Pipeline failed to negotiate?')
+
+        caps = pad.get_negotiated_caps()
+        s = caps[0]
+        w = s['width']
+        h = s['height']
+        par = s['pixel-aspect-ratio']
+        fr = s['framerate']
+        result = dict(width=w, height=h, par=(par.num, par.denom),
+                      framerate=(fr.num, fr.denom))
+
+        log.debug('check', 'returning dict %r' % result)
+        return result
+
+
+    if p.get('dvb_type') == "T":
+        pipeline = ("dvbsrc modulation=\"QAM %(modulation)d\" "
+                    "trans-mode=%(trans_mode)s bandwidth=%(bandwidth)d "
+                    "code-rate-lp=%(code_rate_lp)s "
+                    "code-rate-hp=%(code_rate_hp)s "
+                    "guard=%(guard)d hierarchy=%(hierarchy)d ") % p
+    elif p.get('dvb_type') == "S":
+        pipeline = ("dvbsrc polarity=%(polarity)s symbol-rate=%(symbol_rate)s "
+                    "diseqc-source=%(sat)d ") % p
+        if p.get('code-rate-hp'):
+            pipeline += " code-rate-hp=%s" % p.get('code_rate_hp')
+    elif p.get('dvb_type') == "C":
+        pipeline = ("dvbsrc modulation=\"QAM %(modulation)d\" "
+                    "code-rate-hp=%(code_rate_hp)s ") % p
+
+    if p.get('dvb_type') in ["S", "T", "C"]:
+        pipeline += ("frequency=%d adapter=%d frontend=%d " %
+                     (p.get('frequency'), p.get('adapter'), p.get('frontend')))
+
+
+    pipeline += ("! mpegtsdemux program-number=%d "
+                 "! mpegvideoparse name=parser ! fakesink" %
+                 p.get('program_number'))
+
+    log.debug('check', 'Using pipeline: %s', pipeline)
+
+    d = do_element_check(pipeline, 'parser', get_dvb_video_params)
+    d.addCallback(check.callbackResult, result)
     return d

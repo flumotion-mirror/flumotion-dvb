@@ -81,6 +81,8 @@ flumotion/component/Makefile
 flumotion/component/dvb/Makefile
 flumotion/project/Makefile
 flumotion/project/dvb.py
+flumotion/worker/checks/Makefile
+flumotion/worker/Makefile
 misc/Makefile
 flumotion-dvb.spec
 po/Makefile.in
