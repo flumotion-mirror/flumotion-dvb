@@ -19,13 +19,15 @@
 
 # Headers in this file shall remain intact.
 
-from flumotion.component import feedcomponent
-from flumotion.common import errors
-from twisted.internet import defer
-from flumotion.component.effects.volume import volume
 import gst
-from flumotion.common import messages
+from twisted.internet import defer
+
+from flumotion.common import errors
 from flumotion.common.i18n import N_, gettexter
+from flumotion.component import feedcomponent
+from flumotion.component.effects.volume import volume
+
+
 T_ = gettexter('flumotion')
 
 
