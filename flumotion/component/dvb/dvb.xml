@@ -200,24 +200,10 @@
 
         <directories>
             <directory name="flumotion/component/dvb">
-                <filename location="dvb-antenna.glade" />
-                <filename location="dvb-probe-channels.glade" />
-                <filename location="dvb-video-config.glade" />
-                <filename location="dvb-select-channel.glade" />
+                <filename location="wizard.glade" />
                 <filename location="wizard_gtk.py" />
             </directory>
         </directories>
-    </bundle>
-    <bundle project="dvb" name="dvb-checks">
-       <dependencies>
-          <dependency name="dvb-base" />
-          <dependency name="worker-checks" />
-      </dependencies>
-      <directories>
-        <directory name="flumotion/component/dvb">
-          <filename location="dvbchecks.py" />
-        </directory>
-      </directories>
     </bundle>
 
   </bundles>
