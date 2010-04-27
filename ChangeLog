@@ -1,6 +1,11 @@
 2010-04-27  Xavier Queralt Mateu  <xqueralt@flumotion.com>
 
 	* flumotion/component/dvb/Makefile.am:
+	And add the new wizard.glade
+
+2010-04-27  Xavier Queralt Mateu  <xqueralt@flumotion.com>
+
+	* flumotion/component/dvb/Makefile.am:
 	Remove deleted glade files from
 
 2010-03-01  Xavier Queralt Mateu  <xqueralt@flumotion.com>
