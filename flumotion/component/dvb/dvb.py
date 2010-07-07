@@ -25,8 +25,9 @@ from twisted.internet import defer
 from flumotion.common import errors
 from flumotion.common.i18n import N_, gettexter
 from flumotion.component import feedcomponent
-from flumotion.component.effects.volume import volume
 from flumotion.component.effects.deinterlace import deinterlace
+from flumotion.component.effects.volume import volume
+from flumotion.component.effects.videorate import videorate
 from flumotion.component.effects.videoscale import videoscale
 
 
@@ -65,8 +66,6 @@ def get_decode_pipeline_string(props):
         template = ('%(template)s demux. ! ' \
                     ' queue max-size-buffers=0 max-size-time=0 ' \
                     ' ! mpegvideoparse ! %(videodec)s name=videodecoder' \
-                    '    ! videorate ! capsfilter name=ratefilter' \
-                    '      caps="video/x-raw-yuv,framerate=%(fr)s"' \
                     '    ! %(identity)s name=videoid ' \
                     '    !  @feeder:video@' % dict(template=template,
                             identity=idsync_template,
@@ -293,10 +292,15 @@ class DVB(DVBTSProducer):
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
         self.addEffect(vol)
+        # add videorate effect
+        decoder = pipeline.get_by_name("videodecoder")
+        vr = videorate.Videorate('videorate',
+            decoder.get_pad("src"), pipeline, props.get('framerate', None))
+        self.addEffect(vr)
+        vr.plug()
         # add deinterlacer effect
-        ratefilter = pipeline.get_by_name("ratefilter")
         deinterlacer = deinterlace.Deinterlace('deinterlace',
-                ratefilter.get_pad("src"), pipeline, "auto", "ffmpeg")
+            vr.effectBin.get_pad('src'), pipeline, 'auto', 'ffmpeg')
         self.addEffect(deinterlacer)
         deinterlacer.plug()
         # add videoscaler
@@ -365,10 +369,15 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
         self.addEffect(vol)
+        # add videorate effect
+        decoder = pipeline.get_by_name("videodecoder")
+        vr = videorate.Videorate('videorate',
+            decoder.get_pad("src"), pipeline, props.get('framerate', None))
+        self.addEffect(vr)
+        vr.plug()
         # add deinterlacer effect
-        ratefilter = pipeline.get_by_name("ratefilter")
         deinterlacer = deinterlace.Deinterlace('deinterlace',
-                ratefilter.get_pad("src"), pipeline, "auto", "ffmpeg")
+            vr.effectBin.get_pad('src'), pipeline, 'auto', 'ffmpeg')
         self.addEffect(deinterlacer)
         deinterlacer.plug()
         # add videoscaler
