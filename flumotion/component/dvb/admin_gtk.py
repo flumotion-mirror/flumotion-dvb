@@ -256,6 +256,10 @@ class DecoderBaseAdminGtk(BaseAdminGtk):
                                                'volume', title=_("Volume"))
         self.nodes['Volume'] = volume
 
+        deinterlace = DeinterlaceAdminGtkNode(self.state, self.admin,
+                                    'deinterlace', 'Deinterlacing')
+        self.nodes['Deinterlace'] = deinterlace
+
         return BaseAdminGtk.setup(self)
 
 
