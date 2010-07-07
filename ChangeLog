@@ -1,6 +1,13 @@
+2010-07-07  Andoni Morales Alastruey  <amorales@flumotion.com>
+
+	reviewed by: Marc André Lureau
+
+	* flumotion/component/dvb/dvb.py:
+	Add deinterlace effect to dvb and mpegts producer
+
 2010-04-27  Andoni Morales Alastruey  <amorales@flumotion.com>
 
-	reviewed by: Xavi Queralt 
+	reviewed by: Xavi Queralt
 
 	* flumotion/component/dvb/Makefile.am:
 	Remove deleted dvbchecks.py
