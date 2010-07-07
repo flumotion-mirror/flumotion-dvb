@@ -1,3 +1,10 @@
+2010-07-07  Andoni Morales Alastruey  <amorales@flumotion.com>
+
+	reviewed by: Marc André Lureau
+
+	* flumotion/component/dvb/dvb.py:
+	Add videorate effect
+
 2010-07-07  Marc André Lureau  <mlureau@flumotion.com>
 
 	reviewed by: Andoni Morales
