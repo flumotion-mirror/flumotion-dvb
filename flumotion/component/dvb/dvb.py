@@ -274,6 +274,10 @@ class DVB(DVBTSProducer):
     def do_check(self):
         return self.do_check_dvb()
 
+    def check_properties(self, props, addMessage):
+        if props.get('scaled-width', None) is not None:
+            self.warnDeprecatedProperties(['scaled-width'])
+
     def get_pipeline_string(self, props):
         dvbsrc_template = self.get_dvbsrc_pipeline_string(props)
         decode_template = get_decode_pipeline_string(props)
@@ -348,6 +352,10 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
 
     def init(self):
         pass
+
+    def check_properties(self, props, addMessage):
+        if props.get('scaled-width', None) is not None:
+            self.warnDeprecatedProperties(['scaled-width'])
 
     def get_pipeline_string(self, props):
         return get_decode_pipeline_string(props)
