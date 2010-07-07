@@ -2,6 +2,13 @@
 
 	reviewed by: Andoni Morales
 
+	* flumotion/component/dvb/dvb.py:
+	Warn deprecated scaled-width property
+
+2010-07-07  Marc André Lureau  <mlureau@flumotion.com>
+
+	reviewed by: Andoni Morales
+
 	* flumotion/component/dvb/admin_gtk.py:
 	* flumotion/component/dvb/dvb.py:
 	* flumotion/component/dvb/dvb.xml:
