@@ -3,6 +3,13 @@
 	reviewed by: Marc André Lureau
 
 	* flumotion/component/dvb/admin_gtk.py:
+	Add the deinterlacer node in the decoder admin
+
+2010-07-07  Andoni Morales Alastruey  <amorales@flumotion.com>
+
+	reviewed by: Marc André Lureau
+
+	* flumotion/component/dvb/admin_gtk.py:
 	Add DecoderBaseAdminGtk class and make MegTS and DVB use it.
 	DVB base class was only used by the DVB admin while the decoder base
 	class makes more sense since both MpegTS and DVB will share effects code.
