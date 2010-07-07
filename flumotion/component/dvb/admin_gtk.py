@@ -19,11 +19,17 @@
 
 # Headers in this file shall remain intact.
 
+import os
+
 from gettext import gettext as _
 
 from flumotion.component.base.admin_gtk import BaseAdminGtk
 from flumotion.component.base.baseadminnode import BaseAdminGtkNode
 from flumotion.component.effects.volume import admin_gtk as vadmin_gtk
+from flumotion.component.effects.deinterlace.admin_gtk import \
+    DeinterlaceAdminGtkNode
+from flumotion.component.effects.videoscale.admin_gtk import \
+    VideoscaleAdminGtkNode
 from kiwi.ui.objectlist import Column, ObjectList
 
 # Copied from component/base/admin_gtk.py
@@ -260,6 +266,11 @@ class DecoderBaseAdminGtk(BaseAdminGtk):
                                     'deinterlace', 'Deinterlacing')
         self.nodes['Deinterlace'] = deinterlace
 
+        if 'FLU_VIDEOSCALE_DEBUG' in os.environ:
+            videoscale = VideoscaleAdminGtkNode(self.state, self.admin,
+                'videoscale', 'Video scaling')
+            self.nodes['Videoscale'] = videoscale
+
         return BaseAdminGtk.setup(self)
 
     def component_volumeChanged(self, channel, rms, peak, decay):
@@ -298,6 +309,20 @@ class DecoderBaseAdminGtk(BaseAdminGtk):
             return
         v = self.nodes['Deinterlace']
         v.methodSet(mode)
+
+    def component_effectWidthSet(self, effect, width):
+        if effect != 'videoscale':
+            self.warning('Unknown effect %s in %r' % (effect, self))
+            return
+        v = self.nodes['Videoscale']
+        v.widthSet(width)
+
+    def component_effectHeightSet(self, effect, height):
+        if effect != 'videoscale':
+            self.warning('Unknown effect %s in %r' % (effect, self))
+            return
+        v = self.nodes['Videoscale']
+        v.heightSet(height)
 
 
 class DVBAdminGtk(DecoderBaseAdminGtk):
