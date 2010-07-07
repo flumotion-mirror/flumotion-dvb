@@ -38,31 +38,20 @@ def get_decode_pipeline_string(props):
     deinterlacer = props.get('deinterlacer', None)
     # we only want to scale if specifically told to in config
     scaling_template = ""
-    deinterlacing_template = deinterlacer
     width = props.get('width', None)
     height = props.get('height', None)
-    scaled_width = 720
-    if width and height:
-        scaled_width = props.get('scaled-width', width)
-    if not deinterlacer:
-        interlaced_height = 288
-        deinterlacing_template = ('videoscale method=1 ! '
-            ' video/x-raw-yuv,width=%(sw)s,height=%(ih)s ' % dict(
-            sw=scaled_width, ih=interlaced_height))
-    else:
-        deinterlacing_template = deinterlacer
-    if "width" in props and "height" in props:
+    if None not in [width, height]:
         par = props.get('pixel-aspect-ratio')
         if par:
             scaling_template = ('videoscale method=1 !'
-                ' video/x-raw-yuv,width=%(sw)s,height=%(h)s,'
+                ' video/x-raw-yuv,width=%(w)s,height=%(h)s,'
                 'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
-                    sw=scaled_width,
+                    w=width,
                     h=height, par_n=par[0], par_d=par[1]))
         else:
             scaling_template = ('videoscale method=1 !'
-                'video/x-raw-yuv,width=%(sw)s,height=%(h)s !' % dict(
-                    sw=scaled_width,
+                'video/x-raw-yuv,width=%(w)s,height=%(h)s !' % dict(
+                    w=width,
                     h=height))
     framerate = props.get('framerate', (25, 2))
     fr = "%d/%d" % (framerate[0], framerate[1])
@@ -90,14 +79,11 @@ def get_decode_pipeline_string(props):
         template = ('%(template)s demux. ! ' \
                     ' queue max-size-buffers=0 max-size-time=0 ' \
                     ' ! mpegvideoparse ! %(videodec)s name=videodecoder' \
-                    '    ! video/x-raw-yuv' \
-                    '    ! videorate' \
-                    '    ! video/x-raw-yuv,framerate=%(fr)s' \
-                    '    ! %(deinterlacing)s' \
+                    '    ! videorate ! capsfilter name=ratefilter' \
+                    '      caps="video/x-raw-yuv,framerate=%(fr)s"' \
                     '    ! %(scaling)s %(identity)s name=videoid ' \
                     '    !  @feeder:video@' % dict(template=template,
                             scaling=scaling_template,
-                            deinterlacing=deinterlacing_template,
                             identity=idsync_template,
                             videodec=video_decoder, fr=fr))
     else:
@@ -318,6 +304,12 @@ class DVB(DVBTSProducer):
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
         self.addEffect(vol)
+        # add deinterlacer effect
+        ratefilter = pipeline.get_by_name("ratefilter")
+        deinterlacer = deinterlace.Deinterlace('deinterlace',
+                ratefilter.get_pad("src"), pipeline, "auto", "ffmpeg")
+        self.addEffect(deinterlacer)
+        deinterlacer.plug()
         # attach pad monitors to make sure we know when there is no
         # audio or video comming out
         audiodecoder = pipeline.get_by_name('audiodecoder')
@@ -372,6 +364,12 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
         self.addEffect(vol)
+        # add deinterlacer effect
+        ratefilter = pipeline.get_by_name("ratefilter")
+        deinterlacer = deinterlace.Deinterlace('deinterlace',
+                ratefilter.get_pad("src"), pipeline, "auto", "ffmpeg")
+        self.addEffect(deinterlacer)
+        deinterlacer.plug()
         # attach pad monitors to make sure we know when there is no
         # audio or video coming out
         audiodecoder = pipeline.get_by_name('audiodecoder')
