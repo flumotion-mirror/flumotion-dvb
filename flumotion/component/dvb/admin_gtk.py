@@ -249,7 +249,17 @@ class DVBServiceInformationAdminGtkNode(BaseAdminGtkNode):
         pass
 
 
-class DVBBaseAdminGtk(BaseAdminGtk):
+class DecoderBaseAdminGtk(BaseAdminGtk):
+
+    def setup(self):
+        volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
+                                               'volume', title=_("Volume"))
+        self.nodes['Volume'] = volume
+
+        return BaseAdminGtk.setup(self)
+
+
+class DVBAdminGtk(DecoderBaseAdminGtk):
 
     def setup(self):
         dvbnode = SignalStatisticsAdminGtkNode(self.state, self.admin,
@@ -258,27 +268,13 @@ class DVBBaseAdminGtk(BaseAdminGtk):
         channelsnode = DVBServiceInformationAdminGtkNode(self.state,
             self.admin, title="Channel Information")
         self.nodes["Channel Information"] = channelsnode
-        return BaseAdminGtk.setup(self)
+        return DecoderBaseAdminGtk.setup(self)
 
 
-class DVBAdminGtk(DVBBaseAdminGtk):
-
-    def setup(self):
-        volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
-                                               'volume', title=_("Volume"))
-        self.nodes['Volume'] = volume
-
-        return DVBBaseAdminGtk.setup(self)
-
-
-class MpegTSDecoderAdminGtk(BaseAdminGtk):
+class MpegTSDecoderAdminGtk(DecoderBaseAdminGtk):
 
     def setup(self):
-        volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
-                                               'volume', title=_("Volume"))
-        self.nodes['Volume'] = volume
-
-        return BaseAdminGtk.setup(self)
+        return DecoderBaseAdminGtk.setup(self)
 
 
 class MpegTSSplitterAdminGtk(BaseAdminGtk):
