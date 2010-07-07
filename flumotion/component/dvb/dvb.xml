@@ -57,7 +57,10 @@
 	<property name="height" type="int" />
 	<property name="scaled-width" type="int" />
 	<property name="framerate" type="fraction" />
-	<property name="pixel-aspect-ratio" type="fraction" />
+        <property name="pixel-aspect-ratio" type="fraction"
+                  _description="The pixel-aspect-ratio (Deprecated)" />
+        <property name="is-square" type="bool"
+                  _description="Whether to scale to a 1:1 pixel aspect ratio." />
 	<property name="deinterlacer" type="string" />
 	<!-- ignored, but kept for backward compatibility -->
 	<property name="pids" type="string" />
@@ -71,8 +74,6 @@
       <entries>
         <entry type="component" location="dvb.py"
                function="DVBTSProducer" />
-	<entry type="admin/gtk" location="admin_gtk.py"
-               function="DVBBaseAdminGtk" />
       </entries>
 
       <properties>
@@ -143,7 +144,10 @@
 	<property name="height" type="int" />
 	<property name="scaled-width" type="int" />
 	<property name="framerate" type="fraction" />
-	<property name="pixel-aspect-ratio" type="fraction" />
+        <property name="pixel-aspect-ratio" type="fraction"
+                  _description="The pixel-aspect-ratio (Deprecated)" />
+        <property name="is-square" type="bool"
+                  _description="Whether to scale to a 1:1 pixel aspect ratio." />
 	<property name="deinterlacer" type="string" />
 	<property name="has-video" type="bool" required="false" />
 	<property name="video-decoder" type="string" />
@@ -170,6 +174,8 @@
            <dependency name="component" />
            <dependency name="dvb-base" />
            <dependency name="volume-effect" />
+           <dependency name="deinterlace-effect" />
+           <dependency name="videoscale-effect" />
        </dependencies>
 
        <directories>
@@ -183,6 +189,8 @@
            <dependency name="dvb-base" />
 	   <dependency name="base-admin-gtk" />
 	   <dependency name="volume-admin-gtk" />
+           <dependency name="deinterlace-admin-gtk" />
+           <dependency name="videoscale-admin-gtk" />
        </dependencies>
 
        <directories>
