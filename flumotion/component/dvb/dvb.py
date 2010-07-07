@@ -26,6 +26,8 @@ from flumotion.common import errors
 from flumotion.common.i18n import N_, gettexter
 from flumotion.component import feedcomponent
 from flumotion.component.effects.volume import volume
+from flumotion.component.effects.deinterlace import deinterlace
+from flumotion.component.effects.videoscale import videoscale
 
 
 T_ = gettexter('flumotion')
@@ -37,22 +39,6 @@ def get_decode_pipeline_string(props):
     audio_decoder = props.get('audio-decoder', 'mad')
     deinterlacer = props.get('deinterlacer', None)
     # we only want to scale if specifically told to in config
-    scaling_template = ""
-    width = props.get('width', None)
-    height = props.get('height', None)
-    if None not in [width, height]:
-        par = props.get('pixel-aspect-ratio')
-        if par:
-            scaling_template = ('videoscale method=1 !'
-                ' video/x-raw-yuv,width=%(w)s,height=%(h)s,'
-                'pixel-aspect-ratio=%(par_n)d/%(par_d)d !' % dict(
-                    w=width,
-                    h=height, par_n=par[0], par_d=par[1]))
-        else:
-            scaling_template = ('videoscale method=1 !'
-                'video/x-raw-yuv,width=%(w)s,height=%(h)s !' % dict(
-                    w=width,
-                    h=height))
     framerate = props.get('framerate', (25, 2))
     fr = "%d/%d" % (framerate[0], framerate[1])
     program_number = props.get('program-number')
@@ -81,9 +67,8 @@ def get_decode_pipeline_string(props):
                     ' ! mpegvideoparse ! %(videodec)s name=videodecoder' \
                     '    ! videorate ! capsfilter name=ratefilter' \
                     '      caps="video/x-raw-yuv,framerate=%(fr)s"' \
-                    '    ! %(scaling)s %(identity)s name=videoid ' \
+                    '    ! %(identity)s name=videoid ' \
                     '    !  @feeder:video@' % dict(template=template,
-                            scaling=scaling_template,
                             identity=idsync_template,
                             videodec=video_decoder, fr=fr))
     else:
@@ -298,8 +283,8 @@ class DVB(DVBTSProducer):
             "@feeder:mpegts@" % (dvbsrc_template, decode_template)
         return template
 
-    def configure_pipeline(self, pipeline, properties):
-        super(DVB, self).configure_pipeline(pipeline, properties)
+    def configure_pipeline(self, pipeline, props):
+        super(DVB, self).configure_pipeline(pipeline, props)
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
@@ -310,8 +295,16 @@ class DVB(DVBTSProducer):
                 ratefilter.get_pad("src"), pipeline, "auto", "ffmpeg")
         self.addEffect(deinterlacer)
         deinterlacer.plug()
+        # add videoscaler
+        videoscaler = videoscale.Videoscale('videoscale', self,
+            deinterlacer.effectBin.get_pad("src"), pipeline,
+            props.get('width', 0), props.get('height', 0),
+            props.get('is-square', False))
+        self.addEffect(videoscaler)
+        videoscaler.plug()
+
         # attach pad monitors to make sure we know when there is no
-        # audio or video comming out
+        # audio or video coming out
         audiodecoder = pipeline.get_by_name('audiodecoder')
         videodecoder = pipeline.get_by_name('videodecoder')
         if audiodecoder:
@@ -359,7 +352,7 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
     def get_pipeline_string(self, props):
         return get_decode_pipeline_string(props)
 
-    def configure_pipeline(self, pipeline, properties):
+    def configure_pipeline(self, pipeline, props):
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
@@ -370,6 +363,14 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
                 ratefilter.get_pad("src"), pipeline, "auto", "ffmpeg")
         self.addEffect(deinterlacer)
         deinterlacer.plug()
+        # add videoscaler
+        videoscaler = videoscale.Videoscale('videoscale', self,
+            deinterlacer.effectBin.get_pad("src"), pipeline,
+            props.get('width', 0), props.get('height', 0),
+            props.get('is-square', False))
+        self.addEffect(videoscaler)
+        videoscaler.plug()
+
         # attach pad monitors to make sure we know when there is no
         # audio or video coming out
         audiodecoder = pipeline.get_by_name('audiodecoder')
