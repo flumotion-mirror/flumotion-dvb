@@ -38,7 +38,6 @@ def get_decode_pipeline_string(props):
     has_video = props.get('has-video', True)
     video_decoder = props.get('video-decoder', 'mpeg2dec')
     audio_decoder = props.get('audio-decoder', 'mad')
-    deinterlacer = props.get('deinterlacer', None)
     # we only want to scale if specifically told to in config
     framerate = props.get('framerate', (25, 2))
     fr = "%d/%d" % (framerate[0], framerate[1])
@@ -276,6 +275,25 @@ class DVB(DVBTSProducer):
     def check_properties(self, props, addMessage):
         if props.get('scaled-width', None) is not None:
             self.warnDeprecatedProperties(['scaled-width'])
+        if 'deinterlacer' in props:
+            self.warnDeprecatedProperties(['deinterlacer'])
+
+        deintMode = props.get('deinterlace-mode', 'auto')
+        deintMethod = props.get('deinterlace-method', 'ffmpeg')
+
+        if deintMode not in deinterlace.DEINTERLACE_MODE:
+            msg = messages.Error(T_(N_("Configuration error: '%s' " \
+                "is not a valid deinterlace mode." % deintMode)))
+            addMessage(msg)
+            raise errors.ConfigError(msg)
+
+        if deintMethod not in deinterlace.DEINTERLACE_METHOD:
+            msg = messages.Error(T_(N_("Configuration error: '%s' " \
+                "is not a valid deinterlace method." % deintMethod)))
+            self.debug("'%s' is not a valid deinterlace method",
+                deintMethod)
+            addMessage(msg)
+            raise errors.ConfigError(msg)
 
     def get_pipeline_string(self, props):
         dvbsrc_template = self.get_dvbsrc_pipeline_string(props)
@@ -300,7 +318,9 @@ class DVB(DVBTSProducer):
         vr.plug()
         # add deinterlacer effect
         deinterlacer = deinterlace.Deinterlace('deinterlace',
-            vr.effectBin.get_pad('src'), pipeline, 'auto', 'ffmpeg')
+            vr.effectBin.get_pad('src'), pipeline,
+            props.get('deinterlace-mode', 'auto'),
+            props.get('deinterlace-method', 'ffmpeg'))
         self.addEffect(deinterlacer)
         deinterlacer.plug()
         # add videoscaler
@@ -360,6 +380,25 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
     def check_properties(self, props, addMessage):
         if props.get('scaled-width', None) is not None:
             self.warnDeprecatedProperties(['scaled-width'])
+        if 'deinterlacer' in props:
+            self.warnDeprecatedProperties(['deinterlacer'])
+
+        deintMode = props.get('deinterlace-mode', 'auto')
+        deintMethod = props.get('deinterlace-method', 'ffmpeg')
+
+        if deintMode not in deinterlace.DEINTERLACE_MODE:
+            msg = messages.Error(T_(N_("Configuration error: '%s' " \
+                "is not a valid deinterlace mode." % deintMode)))
+            addMessage(msg)
+            raise errors.ConfigError(msg)
+
+        if deintMethod not in deinterlace.DEINTERLACE_METHOD:
+            msg = messages.Error(T_(N_("Configuration error: '%s' " \
+                "is not a valid deinterlace method." % deintMethod)))
+            self.debug("'%s' is not a valid deinterlace method",
+                deintMethod)
+            addMessage(msg)
+            raise errors.ConfigError(msg)
 
     def get_pipeline_string(self, props):
         return get_decode_pipeline_string(props)
@@ -377,7 +416,9 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         vr.plug()
         # add deinterlacer effect
         deinterlacer = deinterlace.Deinterlace('deinterlace',
-            vr.effectBin.get_pad('src'), pipeline, 'auto', 'ffmpeg')
+            vr.effectBin.get_pad('src'), pipeline,
+            props.get('deinterlace-mode', 'auto'),
+            props.get('deinterlace-method', 'ffmpeg'))
         self.addEffect(deinterlacer)
         deinterlacer.plug()
         # add videoscaler
