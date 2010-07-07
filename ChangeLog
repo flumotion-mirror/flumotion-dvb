@@ -3,6 +3,13 @@
 	reviewed by: Marc André Lureau
 
 	* flumotion/component/dvb/admin_gtk.py:
+	Add component methods for volume and deinterlace effect
+
+2010-07-07  Andoni Morales Alastruey  <amorales@flumotion.com>
+
+	reviewed by: Marc André Lureau
+
+	* flumotion/component/dvb/admin_gtk.py:
 	Add the deinterlacer node in the decoder admin
 
 2010-07-07  Andoni Morales Alastruey  <amorales@flumotion.com>
