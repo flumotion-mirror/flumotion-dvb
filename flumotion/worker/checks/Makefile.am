@@ -1,4 +1,14 @@
 include $(top_srcdir)/common/python.mk
 
-# We do not install __init__.py since it would override flumotion's
-EXTRA_DIST = __init__.py
+flumotiondir = $(libdir)/flumotion/python/flumotion/worker/checks
+
+flumotion_PYTHON = \
+	dvb.py		\
+	dvb.xml
+
+TAGS_FILES = $(flumotion_PYTHON)
+
+clean-local:
+	rm -rf *.pyc *.pyo
+
+EXTRA_DIST = $(flumotion_PYTHON)
