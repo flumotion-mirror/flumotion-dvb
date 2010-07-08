@@ -38,9 +38,6 @@ def get_decode_pipeline_string(props):
     has_video = props.get('has-video', True)
     video_decoder = props.get('video-decoder', 'mpeg2dec')
     audio_decoder = props.get('audio-decoder', 'mad')
-    # we only want to scale if specifically told to in config
-    framerate = props.get('framerate', (25, 2))
-    fr = "%d/%d" % (framerate[0], framerate[1])
     program_number = props.get('program-number')
     audio_pid = props.get('audio-pid', 0)
     # identity to check for imperfect timestamps also for
@@ -68,7 +65,7 @@ def get_decode_pipeline_string(props):
                     '    ! %(identity)s name=videoid ' \
                     '    !  @feeder:video@' % dict(template=template,
                             identity=idsync_template,
-                            videodec=video_decoder, fr=fr))
+                            videodec=video_decoder))
     else:
         template = '%s t. ! queue ! @feeder:video@' % template
     return template
@@ -306,6 +303,8 @@ class DVB(DVBTSProducer):
 
     def configure_pipeline(self, pipeline, props):
         super(DVB, self).configure_pipeline(pipeline, props)
+        fr = props.get('framerate', (25, 2))
+        framerate = gst.Fraction(fr[0], fr[1])
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
@@ -313,7 +312,7 @@ class DVB(DVBTSProducer):
         # add videorate effect
         decoder = pipeline.get_by_name("videodecoder")
         vr = videorate.Videorate('videorate',
-            decoder.get_pad("src"), pipeline, props.get('framerate', None))
+            decoder.get_pad("src"), pipeline, framerate)
         self.addEffect(vr)
         vr.plug()
         # add deinterlacer effect
@@ -404,6 +403,8 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         return get_decode_pipeline_string(props)
 
     def configure_pipeline(self, pipeline, props):
+        fr = props.get('framerate', (25, 2))
+        framerate = gst.Fraction(fr[0], fr[1])
         # add volume effect
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
@@ -411,7 +412,7 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         # add videorate effect
         decoder = pipeline.get_by_name("videodecoder")
         vr = videorate.Videorate('videorate',
-            decoder.get_pad("src"), pipeline, props.get('framerate', None))
+            decoder.get_pad("src"), pipeline, framerate)
         self.addEffect(vr)
         vr.plug()
         # add deinterlacer effect
