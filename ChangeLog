@@ -1,3 +1,10 @@
+2010-07-08  Andoni Morales Alastruey  <amorales@flumotion.com>
+
+	reviewed by: Xavier Queralt
+
+	* flumotion/component/dvb/dvb.py:
+	Use gst.Fraction for the framerate and remove unused code.
+
 2010-07-08  Xavier Queralt Mateu  <xqueralt@flumotion.com>
 
 	*  (svn:ignore):
