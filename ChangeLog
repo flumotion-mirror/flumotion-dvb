@@ -1,3 +1,8 @@
+2010-07-26  Xavier Queralt  <xqueralt@flumotion.com>
+
+	* flumotion/component/dvb/dvb.xml:
+	Add _descriptions to components and properties
+
 2010-07-08  Andoni Morales Alastruey  <amorales@flumotion.com>
 
 	reviewed by: Xavier Queralt
