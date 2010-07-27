@@ -1,7 +1,8 @@
 <registry>
   <components>
     <component type="dvb-producer"
-               base="flumotion/component/dvb">
+               base="flumotion/component/dvb"
+               _description="Produces decoded audio/video from a DVB adapter">
       <source location="flumotion.component.dvb.dvb" />
       <feeder name="audio" />
       <feeder name="video" />
@@ -22,41 +23,63 @@
 
       <properties>
         <!-- S, T or FILE -->
-        <property name="dvb-type" type="string" required="true" />
-	<property name="frequency" type="int" required="false" />
-	<property name="program-number" type="int" required="true" />
-	<property name="has-video" type="bool" required="false" />
-	<property name="video-decoder" type="string" required="false" />
-	<property name="audio-decoder" type="string" required="false" />
+        <property name="dvb-type" type="string" required="true" 
+                  _description="One of: T (for DVB-T), S (for DVB-S) or FILE." />
+	<property name="frequency" type="int" required="false"
+                  _description="Frequency" />
+	<property name="program-number" type="int" required="true"
+                  _description="Program number to demux for" />
+	<property name="has-video" type="bool" required="false"
+                  _description="Wether we want to capture video from the source" />
+	<property name="video-decoder" type="string" required="false"
+                  _description="Video decoder the component should use" />
+	<property name="audio-decoder" type="string" required="false"
+                  _description="Audio decoder the component should use" />
 	<!-- audio pid: optional argument used to identify the audio
 	     pid that we want to use, in the case there may be many -->
-	<property name="audio-pid" type="int" required="false" />
+	<property name="audio-pid" type="int" required="false"
+                  _description="Colon seperated list of audio pids" />
 	<!-- S, T -->
 	<property name="device" type="string" required="false"
-		  description="Device prefix (deprecated)" />
+		  _description="Device prefix (deprecated)" />
 	<property name="adapter" type="int" required="false"
-	          description="Adapter number (eg 0 for adapter 0)" />
+	          _description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
-	          description="Frontend number (eg 0 for frontend 0)" />
-	<property name="code-rate-hp" type="string" />
+	          _description="Frontend number (eg 0 for frontend 0)" />
+	<property name="code-rate-hp" type="string"
+                  _description="High Priority Code Rate (DVB-T, DVB-S and DVB-C)" />
 	<!-- DVB-T specific properties -->
-	<property name="modulation" type="int" />
-	<property name="trans-mode" type="string" />
-        <property name="bandwidth" type="int" />
-        <property name="code-rate-lp" type="string" />
-	<property name="guard" type="int" />
-	<property name="hierarchy" type="int" />
+	<property name="modulation" type="int"
+                  _description="Modulation (DVB-T and DVB-C)" />
+	<property name="trans-mode" type="string"
+                  _description="Transmission Mode (DVB-T)" />
+        <property name="bandwidth" type="int"
+                  _description="Bandwidth (DVB-T)" />
+        <property name="code-rate-lp" type="string"
+                  _description="High Priority Code Rate (DVB-T, DVB-S and DVB-C)" />
+	<property name="guard" type="int"
+                  _description="Guard Interval (DVB-T)" />
+	<property name="hierarchy" type="int"
+                  _description="Hierarchy Information (DVB-T)" />
 	<!-- DVB-S specific properties -->
-	<property name="polarity" type="string" />
-	<property name="symbol-rate" type="string" />
-	<property name="satellite-number" type="int" />
+	<property name="polarity" type="string"
+                  _description="Polarity [vhHV] (DVB-S)" />
+	<property name="symbol-rate" type="string"
+                  _description="Symbol Rate (DVB-S, DVB-C)" />
+	<property name="satellite-number" type="int"
+                  _description="DISEqC selected satellite (DVB-S)" />
 	<!-- File specific properties -->
-	<property name="filename" type="string" />
+	<property name="filename" type="string"
+                  _description="The location of the TS file." />
 	<!-- output properties -->
-	<property name="width" type="int" />
-	<property name="height" type="int" />
-	<property name="scaled-width" type="int" />
-	<property name="framerate" type="fraction" />
+	<property name="width" type="int"
+                  _description="The width to capture the video at." />
+	<property name="height" type="int"
+                  _description="The height to capture the video at." />
+	<property name="scaled-width" type="int"
+                  _description="The width to scale the video to." />
+	<property name="framerate" type="fraction"
+                  _description="Output framerate" />
         <property name="pixel-aspect-ratio" type="fraction"
                   _description="The pixel-aspect-ratio (Deprecated)" />
         <property name="is-square" type="bool"
@@ -68,12 +91,14 @@
 	<property name="deinterlacer" type="string"
                   _description="Deprecated" />
 	<!-- ignored, but kept for backward compatibility -->
-	<property name="pids" type="string" />
+	<property name="pids" type="string"
+                  _description="Ignored, kept for backward compatibility" />
       </properties>
     </component>
 
     <component type="dvb-ts-producer"
-               base="flumotion/component/dvb">
+               base="flumotion/component/dvb"
+               _description="Produces a transport stream from a DVB adapter">
       <source location="flumotion.component.dvb.dvb" />
       <feeder name="default" />
       <entries>
@@ -83,9 +108,12 @@
 
       <properties>
         <!-- S, T or FILE -->
-        <property name="dvb-type" type="string" required="true" />
-	<property name="frequency" type="int" required="false" />
-	<property name="program-numbers" type="string" required="true" />
+        <property name="dvb-type" type="string" required="true"
+                  _description="One of: T (for DVB-T), S (for DVB-S) or FILE." />
+	<property name="frequency" type="int" required="false"
+                  _description="Frequency" />
+	<property name="program-numbers" type="string" required="true"
+                  _description="Program numbers to demux for" />
 	<!-- S, T -->
 	<property name="device" type="string" required="false"
 		  description="Device prefix (deprecated)" />
@@ -93,26 +121,38 @@
 	          description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
 	          description="Frontend number (eg 0 for frontend 0)" />
-	<property name="code-rate-hp" type="string" />
+	<property name="code-rate-hp" type="string"
+                  _description="High Priority Code Rate (DVB-T, DVB-S and DVB-C)" />
 	<!-- DVB-T specific properties -->
-	<property name="modulation" type="int" />
-	<property name="trans-mode" type="int" />
-        <property name="bandwidth" type="int" />
-        <property name="code-rate-lp" type="string" />
-	<property name="guard" type="int" />
-	<property name="hierarchy" type="int" />
+	<property name="modulation" type="int"
+                  _description="Modulation (DVB-T and DVB-C)" />
+	<property name="trans-mode" type="int"
+                  _description="Transmission Mode (DVB-T)" />
+        <property name="bandwidth" type="int"
+                  _description="Bandwidth (DVB-T)" />
+        <property name="code-rate-lp" type="string"
+                  _description="High Priority Code Rate (DVB-T, DVB-S and DVB-C)" />
+	<property name="guard" type="int"
+                  _description="Guard Interval (DVB-T)" />
+	<property name="hierarchy" type="int"
+                  _description="Hierarchy Information (DVB-T)" />
 	<!-- DVB-S specific properties -->
-	<property name="polarity" type="string" />
-	<property name="symbol-rate" type="string" />
-	<property name="satellite-number" type="int" />
+	<property name="polarity" type="string"
+                  _description="Polarity [vhHV] (DVB-S)" />
+	<property name="symbol-rate" type="string"
+                  _description="Symbol Rate (DVB-S, DVB-C)" />
+	<property name="satellite-number" type="int"
+                  _description="DISEqC selected satellite (DVB-S)" />
 	<!-- File specific properties -->
-	<property name="filename" type="string" />
+	<property name="filename" type="string"
+                  _description="The location of the TS file." />
 	<!-- output properties -->
       </properties>
     </component>
 
     <component type="mpeg-ts-splitter"
-               base="flumotion/component/dvb">
+               base="flumotion/component/dvb"
+               _description="Eats from a transport stream selecting just the needed program numbers" >
       <source location="flumotion.component.dvb.dvb" />
       <eater name="default" />
       <feeder name="default" />
@@ -121,12 +161,14 @@
                function="MpegTSSplitter" />
       </entries>
       <properties>
-        <property name="program-number" type="int" />
+        <property name="program-number" type="int"
+                  _description="Program number to demux for" />
       </properties>
     </component>
 
     <component type="mpeg-ts-decoder"
-               base="flumotion/component/dvb">
+               base="flumotion/component/dvb"
+               _description="Decodes the audio/video from a transport stream" >
       <source location="flumotion.component.dvb.dvb" />
       <eater name="default" />
       <feeder name="audio" />
@@ -140,23 +182,37 @@
       </entries>
 
       <properties>
-        <property name="program-number" type="int" required="true" />
+        <property name="program-number" type="int" required="true"
+                  _description="Program number to demux for" />
 	<!-- audio pid: optional argument used to identify the audio
 	     pid that we want to use, in the case there may be many -->
-	<property name="audio-pid" type="int" required="false" />
+	<property name="audio-pid" type="int" required="false"
+                  _description="The  audio pid that we want to use, in the case there may be many" />
 	<!-- output properties -->
-	<property name="width" type="int" />
-	<property name="height" type="int" />
-	<property name="scaled-width" type="int" />
-	<property name="framerate" type="fraction" />
+	<property name="width" type="int"
+                  _description="The width to capture the video at." />
+	<property name="height" type="int"
+                  _description="The height to capture the video at." />
+	<property name="scaled-width" type="int"
+                  _description="The width to scale the video to." />
+	<property name="framerate" type="fraction"
+                  _description="Output framerate" />
         <property name="pixel-aspect-ratio" type="fraction"
                   _description="The pixel-aspect-ratio (Deprecated)" />
         <property name="is-square" type="bool"
                   _description="Whether to scale to a 1:1 pixel aspect ratio." />
-	<property name="deinterlacer" type="string" />
-	<property name="has-video" type="bool" required="false" />
-	<property name="video-decoder" type="string" />
-	<property name="audio-decoder" type="string" />
+	<property name="deinterlace-mode" type="string"
+                  _description="Deinterlace mode.(Default=auto)" />
+	<property name="deinterlace-method" type="string"
+                  _description="Deinterlace method.(Default=ffmpeg)" />
+	<property name="deinterlacer" type="string"
+                  _description="Deprecated" />
+	<property name="has-video" type="bool" required="false"
+                  _description="Wether we want to capture video from the source" />
+	<property name="video-decoder" type="string" required="false"
+                  _description="Video decoder the component should use" />
+	<property name="audio-decoder" type="string" required="false"
+                  _description="Audio decoder the component should use" />
       </properties>
     </component>
 
