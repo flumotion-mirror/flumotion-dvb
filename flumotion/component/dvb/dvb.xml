@@ -116,11 +116,11 @@
                   _description="Program numbers to demux for" />
 	<!-- S, T -->
 	<property name="device" type="string" required="false"
-		  description="Device prefix (deprecated)" />
+		  _description="Device prefix (deprecated)" />
 	<property name="adapter" type="int" required="false"
-	          description="Adapter number (eg 0 for adapter 0)" />
+	          _description="Adapter number (eg 0 for adapter 0)" />
 	<property name="frontend" type="int" required="false"
-	          description="Frontend number (eg 0 for frontend 0)" />
+	          _description="Frontend number (eg 0 for frontend 0)" />
 	<property name="code-rate-hp" type="string"
                   _description="High Priority Code Rate (DVB-T, DVB-S and DVB-C)" />
 	<!-- DVB-T specific properties -->
