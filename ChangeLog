@@ -1,3 +1,8 @@
+2010-07-27  Xavier Queralt  <xqueralt@flumotion.com>
+
+	* flumotion/component/dvb/dvb.xml:
+	Replace deprecated descriptions by _description
+
 2010-07-26  Xavier Queralt  <xqueralt@flumotion.com>
 
 	* flumotion/component/dvb/dvb.xml:
