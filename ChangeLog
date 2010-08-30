@@ -1,6 +1,6 @@
 2010-08-30  Andoni Morales Alastruey  <amorales@flumotion.com>
 
-	reviewed by: Jan Urbansky
+	reviewed by: Jan Urbanski
 
 	* flumotion/component/dvb/dvb.xml:
 	Add missing videorate bundle
