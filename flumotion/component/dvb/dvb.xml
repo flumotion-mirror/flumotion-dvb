@@ -237,6 +237,7 @@
            <dependency name="volume-effect" />
            <dependency name="deinterlace-effect" />
            <dependency name="videoscale-effect" />
+           <dependency name="videorate-effect" />
        </dependencies>
 
        <directories>
