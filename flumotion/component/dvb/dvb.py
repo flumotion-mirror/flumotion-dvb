@@ -409,10 +409,20 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         level = pipeline.get_by_name('level')
         vol = volume.Volume('volume', level, pipeline)
         self.addEffect(vol)
+
+        # attach pad monitors to make sure we know when there is no
+        # audio coming out
+        audiodecoder = pipeline.get_by_name('audiodecoder')
+        if audiodecoder:
+            self._pad_monitors.attach(audiodecoder.get_pad('src'),
+                "audiodecoder")
+
+        videodecoder = pipeline.get_by_name('videodecoder')
+        if not videodecoder:
+            return
         # add videorate effect
-        decoder = pipeline.get_by_name("videodecoder")
         vr = videorate.Videorate('videorate',
-            decoder.get_pad("src"), pipeline, framerate)
+            videodecoder.get_pad("src"), pipeline, framerate)
         self.addEffect(vr)
         vr.plug()
         # add deinterlacer effect
@@ -431,15 +441,9 @@ class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
         videoscaler.plug()
 
         # attach pad monitors to make sure we know when there is no
-        # audio or video coming out
-        audiodecoder = pipeline.get_by_name('audiodecoder')
-        videodecoder = pipeline.get_by_name('videodecoder')
-        if audiodecoder:
-            self._pad_monitors.attach(audiodecoder.get_pad('src'),
-                "audiodecoder")
-        if videodecoder:
-            self._pad_monitors.attach(videodecoder.get_pad('src'),
-                "videodecoder")
+        # video coming out
+        self._pad_monitors.attach(videodecoder.get_pad('src'),
+                                  "videodecoder")
 
     def setVolume(self, value):
         self.debug("Volume set to %d" % value)
