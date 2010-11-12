@@ -1,3 +1,10 @@
+2010-11-12  Julien Le Goff  <jlegoff@flumotion.com>
+
+	reviewed by: Andoni Morales 
+
+	* flumotion/component/dvb/dvb.py:
+	Do not add deinterlace effect if there is no video stream.
+
 2010-08-30  Andoni Morales Alastruey  <amorales@flumotion.com>
 
 	reviewed by: Jan Urbanski
