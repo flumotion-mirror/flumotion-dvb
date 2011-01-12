@@ -20,6 +20,9 @@ AUTHORS=$srcdir/AUTHORS
 
 AC_SUBST(FLU_REQ, 0.5.4)
 
+dnl Start date used to autogenrate ChangeLog from 'git log'
+AC_SUBST(GIT_LOG_START_DATE, "Jan 11 00:00:00 2011")
+
 dnl Add parameters for aclocal
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4 -I common")
 AC_CONFIG_MACRO_DIR([m4])
