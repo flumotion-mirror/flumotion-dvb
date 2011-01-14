@@ -1,0 +1,63 @@
+# Ignore tarballs
+*.tar.bz2
+*.tar.gz
+
+# Ignore all the Makefiles
+*Makefile
+*Makefile.in
+
+# Ignore autocrap
+.version
+ABOUT-NLS
+CangeLog.tmp
+ChangeLog.tmp
+INSTALL
+aclocal.m4
+autoregen.sh
+config.guess
+config.log
+config.rpath
+config.status
+config.sub
+configure
+depcomp
+env
+flumotion-dvb.spec
+install-sh
+intltool-extract
+intltool-merge
+intltool-update
+libtool
+ltmain.sh
+missing
+mkinstalldirs
+py-compile
+COPYING
+
+
+# Ignore folders
+autom4te.cache/
+m4/
+locale/
+
+# Misc ignores
+flumotion-test/
+flumotion/project/dvb.py
+flumotion/test/setup.py
+misc/setup.py
+flumotion/project/dvb.locale.xml
+
+# Ignore po generated files
+po/Makefile.in.in
+po/POTFILES
+po/Rules-quot
+po/boldquot.sed
+po/en@boldquot.header
+po/en@quot.header
+po/insert-header.sin
+po/quot.sed
+po/remove-potcdate.sin
+po/stamp-it
+po/flumotion-dvb.pot
+po/remove-potcdate.sed
+po/*gmo
