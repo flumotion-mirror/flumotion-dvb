@@ -6,17 +6,28 @@ msgid ""
 msgstr ""
 "Project-Id-Version: flumotion-template 0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-02-06 11:18+0100\n"
+"POT-Creation-Date: 2011-01-14 12:16+0100\n"
 "PO-Revision-Date: 2005-07-28 12:41+0200\n"
 "Last-Translator: Thomas Vander Stichele <thomas at fluendo dot com>\n"
 "Language-Team: Fluendo\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: flumotion/component/dvb/dvb.py:49
+#: flumotion/component/dvb/dvb.py:110
 #, python-format
 msgid "To use DVB-%s mode, you need to specify property '%s'."
+msgstr ""
+
+#: flumotion/component/dvb/dvb.py:282 flumotion/component/dvb/dvb.py:389
+#, python-format
+msgid "Configuration error: '%s' is not a valid deinterlace mode."
+msgstr ""
+
+#: flumotion/component/dvb/dvb.py:288 flumotion/component/dvb/dvb.py:395
+#, python-format
+msgid "Configuration error: '%s' is not a valid deinterlace method."
 msgstr ""
 
 #~ msgid "Sample"
