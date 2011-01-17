@@ -1,3 +1,6 @@
+# Ignore compiled files
+*.pyc
+
 # Ignore tarballs
 *.tar.bz2
 *.tar.gz
@@ -22,6 +25,7 @@ config.sub
 configure
 depcomp
 env
+flu-saved-coverage.pickle
 flumotion-dvb.spec
 install-sh
 intltool-extract
@@ -36,6 +40,7 @@ COPYING
 
 
 # Ignore folders
+_trial_coverage/
 autom4te.cache/
 m4/
 locale/
