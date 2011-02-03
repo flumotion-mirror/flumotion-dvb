@@ -4,7 +4,7 @@ dnl initialize autoconf
 dnl when going to/from release please remove/add the nano (fourth number)
 dnl releases only do Wall, cvs and prerelease does Werror too
 AC_INIT(flumotion-dvb, 0.5.1.1,
-   http://https://code.fluendo.com/flumotion/trac/newticket?component=flumotion-dvb,
+   https://code.flumotion.com/trac/newticket?component=flumotion-dvb,
    flumotion-dvb)
 
 dnl initialize automake
