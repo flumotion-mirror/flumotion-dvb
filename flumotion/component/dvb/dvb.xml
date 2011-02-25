@@ -31,6 +31,8 @@
                   _description="Program number to demux for" />
 	<property name="has-video" type="bool" required="false"
                   _description="Wether we want to capture video from the source" />
+	<property name="video-parser" type="string" required="false"
+                  _description="Video parser the component should use" />
 	<property name="video-decoder" type="string" required="false"
                   _description="Video decoder the component should use" />
 	<property name="audio-decoder" type="string" required="false"
@@ -209,6 +211,8 @@
                   _description="Deprecated" />
 	<property name="has-video" type="bool" required="false"
                   _description="Wether we want to capture video from the source" />
+	<property name="video-parser" type="string" required="false"
+                  _description="Video parser the component should use" />
 	<property name="video-decoder" type="string" required="false"
                   _description="Video decoder the component should use" />
 	<property name="audio-decoder" type="string" required="false"

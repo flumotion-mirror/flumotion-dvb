@@ -36,6 +36,7 @@ T_ = gettexter('flumotion')
 
 def get_decode_pipeline_string(props):
     has_video = props.get('has-video', True)
+    video_parser = props.get('video-parser', 'mpegvideoparse')
     video_decoder = props.get('video-decoder', 'mpeg2dec')
     audio_decoder = props.get('audio-decoder', 'mad')
     program_number = props.get('program-number')
@@ -61,10 +62,11 @@ def get_decode_pipeline_string(props):
     if has_video:
         template = ('%(template)s demux. ! ' \
                     ' queue max-size-buffers=0 max-size-time=0 ' \
-                    ' ! mpegvideoparse ! %(videodec)s name=videodecoder' \
+                    '! %(videoparse)s ! %(videodec)s name=videodecoder' \
                     '    ! %(identity)s name=videoid ' \
                     '    !  @feeder:video@' % dict(template=template,
                             identity=idsync_template,
+                            videoparse=video_parser,
                             videodec=video_decoder))
     else:
         template = '%s t. ! queue ! @feeder:video@' % template
