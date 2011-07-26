@@ -51,7 +51,7 @@ def get_decode_pipeline_string(props):
     template = 'flutsdemux name=demux program-number=%(program_number)d' \
         ' demux.%(audiopid)s ! ' \
         ' queue max-size-buffers=0 max-size-time=0' \
-        ' ! %(audiodec)s name=audiodecoder ! audiorate' \
+        ' ! %(audiodec)s name=audiodecoder' \
         ' ! %(identity)s name=audioid' \
         ' ! audioconvert ! level name=level ! volume name=volume' \
         ' ! tee name=t ! @feeder:audio@' % dict(
