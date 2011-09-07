@@ -16,8 +16,7 @@ dist: changelog
 
 EXTRA_DIST = \
 	env.in \
-	LICENSE.GPL \
-	LICENSE.Flumotion \
+	LICENSE.LGPL \
 	flumotion-dvb.spec
 
 PYCHECKER_WHITELIST = flumotion/component/dvb/*.py

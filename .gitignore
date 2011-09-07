@@ -36,7 +36,6 @@ ltmain.sh
 missing
 mkinstalldirs
 py-compile
-COPYING
 
 
 # Ignore folders
