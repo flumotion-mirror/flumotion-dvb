@@ -3,22 +3,23 @@
 dnl initialize autoconf
 dnl when going to/from release please remove/add the nano (fourth number)
 dnl releases only do Wall, cvs and prerelease does Werror too
-AC_INIT(flumotion-dvb, 0.5.1.1,
-   https://code.flumotion.com/trac/newticket?component=flumotion-dvb,
-   flumotion-dvb)
+AC_INIT(flumotion-dvb, m4_esyscmd([ test -z "$VERSION" && VERSION=0.10.0;
+                       common/version-gen $VERSION .tarball-version]),
+   [flumotion-devel@lists.fluendo.com],
+   [flumotion-dvb], [http://www.flumotion.net/])
 
 dnl initialize automake
 AM_INIT_AUTOMAKE([-Wno-portability])
 
 dnl define PACKAGE_VERSION_* variables
 AS_VERSION
-
+AC_SUBST(PACKAGE_VERSION_SPEC, `echo $VERSION | tr '-' '_'`)
 AS_NANO
 
 AC_SUBST_FILE(AUTHORS)
 AUTHORS=$srcdir/AUTHORS
 
-AC_SUBST(FLU_REQ, 0.5.4)
+AC_SUBST(FLU_REQ, 0.10.0)
 
 dnl Start date used to autogenrate ChangeLog from 'git log'
 AC_SUBST(GIT_LOG_START_COMMIT, "3b30603ea024deb63200d9a5b2b75bcd68c26594")

@@ -17,6 +17,7 @@ if test ! -f common/flumotion-trial;
   exit 1
 fi
 
+rm -f .version
 autopoint || exit 1
 aclocal -I m4 -I common || exit 1
 # libtoolize --force || exit 1

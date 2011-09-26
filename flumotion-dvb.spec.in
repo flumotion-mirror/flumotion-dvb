@@ -1,11 +1,11 @@
 Name:           @PACKAGE@
-Version:        @VERSION@
+Version:        @PACKAGE_VERSION_SPEC@
 Release:        @PACKAGE_VERSION_RELEASE@%{?dist}
 Summary:        Flumotion DVB support
 
 Group:          Applications/Internet
 License:	LGPL
-URL:            http://www.flumotion.net
+URL:            http://www.flumotion.net/
 Source:         %{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
