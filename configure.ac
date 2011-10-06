@@ -81,7 +81,8 @@ common/Makefile
 flumotion/Makefile
 flumotion/test/Makefile
 flumotion/component/Makefile
-flumotion/component/dvb/Makefile
+flumotion/component/producers/Makefile
+flumotion/component/producers/dvb/Makefile
 flumotion/project/Makefile
 flumotion/project/dvb.py
 flumotion/worker/checks/Makefile

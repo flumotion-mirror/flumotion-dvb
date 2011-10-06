@@ -1,9 +1,9 @@
 <registry>
   <components>
     <component type="dvb-producer"
-               base="flumotion/component/dvb"
+               base="flumotion/component/producers/dvb"
                _description="Produces decoded audio/video from a DVB adapter">
-      <source location="flumotion.component.dvb.dvb" />
+      <source location="flumotion.component.producers.dvb.dvb" />
       <feeder name="audio" />
       <feeder name="video" />
       <feeder name="mpegts" />
@@ -99,9 +99,9 @@
     </component>
 
     <component type="dvb-ts-producer"
-               base="flumotion/component/dvb"
+               base="flumotion/component/producers/dvb"
                _description="Produces a transport stream from a DVB adapter">
-      <source location="flumotion.component.dvb.dvb" />
+      <source location="flumotion.component.producers.dvb.dvb" />
       <feeder name="default" />
       <entries>
         <entry type="component" location="dvb.py"
@@ -153,9 +153,9 @@
     </component>
 
     <component type="mpeg-ts-splitter"
-               base="flumotion/component/dvb"
+               base="flumotion/component/producers/dvb"
                _description="Eats from a transport stream selecting just the needed program numbers" >
-      <source location="flumotion.component.dvb.dvb" />
+      <source location="flumotion.component.producers.dvb.dvb" />
       <eater name="default" />
       <feeder name="default" />
       <entries>
@@ -169,9 +169,9 @@
     </component>
 
     <component type="mpeg-ts-decoder"
-               base="flumotion/component/dvb"
+               base="flumotion/component/producers/dvb"
                _description="Decodes the audio/video from a transport stream" >
-      <source location="flumotion.component.dvb.dvb" />
+      <source location="flumotion.component.producers.dvb.dvb" />
       <eater name="default" />
       <feeder name="audio" />
       <feeder name="video" />
@@ -228,7 +228,7 @@
        </dependencies>
 
        <directories>
-           <directory name="flumotion/component/dvb">
+           <directory name="flumotion/component/producers/dvb">
                <filename location="__init__.py" />
            </directory>
        </directories>
@@ -245,7 +245,7 @@
        </dependencies>
 
        <directories>
-           <directory name="flumotion/component/dvb">
+           <directory name="flumotion/component/producers/dvb">
                <filename location="dvb.py" />
            </directory>
        </directories>
@@ -260,7 +260,7 @@
        </dependencies>
 
        <directories>
-           <directory name="flumotion/component/dvb">
+           <directory name="flumotion/component/producers/dvb">
 	       <filename location="admin_gtk.py" />
 	       <filename location="dvb.glade" />
 	   </directory>
@@ -273,7 +273,7 @@
         </dependencies>
 
         <directories>
-            <directory name="flumotion/component/dvb">
+            <directory name="flumotion/component/producers/dvb">
                 <filename location="wizard.glade" />
                 <filename location="wizard_gtk.py" />
             </directory>

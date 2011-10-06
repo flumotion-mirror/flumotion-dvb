@@ -4,30 +4,169 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: flumotion-template 0\n"
+"Project-Id-Version: flumotion-dvb 0.10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-01-14 12:16+0100\n"
+"POT-Creation-Date: 2011-10-06 11:54+0000\n"
 "PO-Revision-Date: 2005-07-28 12:41+0200\n"
 "Last-Translator: Thomas Vander Stichele <thomas at fluendo dot com>\n"
-"Language-Team: Fluendo\n"
+"Language-Team: nl \n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: flumotion/component/dvb/dvb.py:110
+#: flumotion/component/producers/dvb/dvb.py:109
 #, python-format
 msgid "To use DVB-%s mode, you need to specify property '%s'."
 msgstr ""
 
-#: flumotion/component/dvb/dvb.py:282 flumotion/component/dvb/dvb.py:389
+#: flumotion/component/producers/dvb/dvb.py:281
+#: flumotion/component/producers/dvb/dvb.py:388
 #, python-format
 msgid "Configuration error: '%s' is not a valid deinterlace mode."
 msgstr ""
 
-#: flumotion/component/dvb/dvb.py:288 flumotion/component/dvb/dvb.py:395
+#: flumotion/component/producers/dvb/dvb.py:287
+#: flumotion/component/producers/dvb/dvb.py:394
 #, python-format
 msgid "Configuration error: '%s' is not a valid deinterlace method."
+msgstr ""
+
+#: flumotion/component/producers/dvb/admin_gtk.py:259
+msgid "Volume"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:93
+msgid "Original Version"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:94
+msgid "Audio description"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:196
+#: flumotion/component/producers/dvb/wizard_gtk.py:198
+msgid "Probing DVB Channels"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:197
+msgid "Probing DVB"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:199
+#: flumotion/component/producers/dvb/wizard_gtk.py:514
+msgid "Production"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:226
+msgid "The selected stream doesn't contain a suitable video feed."
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:275
+#: flumotion/component/producers/dvb/wizard_gtk.py:575
+msgid "Checking for DVB elements..."
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:287
+msgid "Checking for DVB adapters..."
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:307
+msgid "No adapter found."
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:398
+msgid "Scan finished"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:403
+msgid "No channels found"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:511
+#: flumotion/component/producers/dvb/wizard_gtk.py:512
+msgid "DVB A/V Configuration"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard_gtk.py:513
+msgid "DVB A/V"
+msgstr ""
+
+#: flumotion/component/producers/dvb/dvb.glade:8
+msgid "DVB"
+msgstr ""
+
+#: flumotion/component/producers/dvb/dvb.glade:35
+msgid "Signal strength:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/dvb.glade:64
+msgid "Signal to noise ratio:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/dvb.glade:93
+msgid "Bit error rate:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/dvb.glade:122
+msgid "Uncorrected Blocks:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/dvb.glade:209
+msgid "Locked:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:7
+#: flumotion/component/producers/dvb/wizard.glade:277
+msgid "window1"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:34
+msgid "_Width:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:47
+msgid "_Height:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:115
+msgid "_Frame Rate:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:142
+msgid "<b>DVB Video configuration:</b>"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:174
+msgid "_Audio channel:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:200
+msgid "<b>DVB Audio configuration:</b>"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:231
+msgid "_Subtitles:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:258
+msgid "<b>DVB Subtitles configuration:</b>"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:291
+msgid "Select an adapter and your location:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:354
+msgid "Select a channel from the list below:"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:406
+msgid "Start"
+msgstr ""
+
+#: flumotion/component/producers/dvb/wizard.glade:443
+msgid "Stop"
 msgstr ""
 
 #~ msgid "Sample"

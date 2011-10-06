@@ -1,1 +1,5 @@
-flumotion/component/dvb/dvb.py
+flumotion/component/producers/dvb/dvb.py
+flumotion/component/producers/dvb/admin_gtk.py
+flumotion/component/producers/dvb/wizard_gtk.py
+flumotion/component/producers/dvb/dvb.glade
+flumotion/component/producers/dvb/wizard.glade
