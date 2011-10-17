@@ -116,7 +116,6 @@ class DVBProducer(AudioProducer, VideoProducer):
         # FIXME: find the elements that we can use, not hardcode
         self.properties.video_decoder = 'mpeg2dec'
         self.properties.audio_decoder = 'mad'
-        self.properties.deinterlacer = 'ffmpegcolorspace ! deinterlace'
         self.properties.width = 360
         self.properties.height = 288
         self.properties.framerate = 12.5
@@ -320,8 +319,7 @@ class DVBProbeChannelsStep(WorkerWizardStep):
 
         d = self.wizard.requireElements(self.model.worker, 'dvbsrc',
                                         'mpegtsparse', 'mpeg2dec', 'mad',
-                                        'deinterlace', 'flutsdemux',
-                                        'mpegvideoparse')
+                                        'flutsdemux', 'mpegvideoparse')
         d.addCallback(gotElements)
         return d
 

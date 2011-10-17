@@ -22,10 +22,7 @@ from twisted.internet import defer
 from flumotion.common import errors
 from flumotion.common.i18n import N_, gettexter
 from flumotion.component import feedcomponent
-from flumotion.component.effects.deinterlace import deinterlace
-from flumotion.component.effects.volume import volume
-from flumotion.component.effects.videorate import videorate
-from flumotion.component.effects.videoscale import videoscale
+from flumotion.component.common.avproducer import avproducer
 
 
 T_ = gettexter('flumotion')
@@ -50,7 +47,8 @@ def get_decode_pipeline_string(props):
         ' queue max-size-buffers=0 max-size-time=0' \
         ' ! %(audiodec)s name=audiodecoder' \
         ' ! %(identity)s name=audioid' \
-        ' ! audioconvert ! level name=level ! volume name=volume' \
+        ' ! audioconvert ! level name=volumelevel '\
+        ' ! volume name=setvolume' \
         ' ! tee name=t ! @feeder:audio@' % dict(
             audiopid=audio_pid_template,
             audiodec=audio_decoder,
@@ -246,7 +244,7 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
                     if e["running-status"] == 4:
                         txt = "%d/%d/%d %d:%d (%d minutes)" % (
                             e["day"], e["month"], e["year"], e["hour"],
-                            e["minute"], e["duration"]/60)
+                            e["minute"], e["duration"] / 60)
                         if e.has_field("name"):
                             txt = "%s %s" % (txt, e["name"])
                         if e.has_field("description"):
@@ -263,35 +261,24 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
                         e["running-status"])
 
 
-class DVB(DVBTSProducer):
+class DVB(DVBTSProducer, avproducer.AVProducerBase):
 
     def do_check(self):
-        return self.do_check_dvb()
+        d = avproducer.AVProducerBase.do_check(self)
+        d.addCallback(lambda _: self.do_check_dvb())
+        return d
+
+    def get_raw_video_element(self):
+        return self.pipeline.get_by_name('videodecoder')
 
     def check_properties(self, props, addMessage):
         if props.get('scaled-width', None) is not None:
             self.warnDeprecatedProperties(['scaled-width'])
         if 'deinterlacer' in props:
             self.warnDeprecatedProperties(['deinterlacer'])
+        avproducer.AVProducerBase.check_properties(self, props, addMessage)
 
-        deintMode = props.get('deinterlace-mode', 'auto')
-        deintMethod = props.get('deinterlace-method', 'ffmpeg')
-
-        if deintMode not in deinterlace.DEINTERLACE_MODE:
-            msg = messages.Error(T_(N_("Configuration error: '%s' " \
-                "is not a valid deinterlace mode." % deintMode)))
-            addMessage(msg)
-            raise errors.ConfigError(msg)
-
-        if deintMethod not in deinterlace.DEINTERLACE_METHOD:
-            msg = messages.Error(T_(N_("Configuration error: '%s' " \
-                "is not a valid deinterlace method." % deintMethod)))
-            self.debug("'%s' is not a valid deinterlace method",
-                deintMethod)
-            addMessage(msg)
-            raise errors.ConfigError(msg)
-
-    def get_pipeline_string(self, props):
+    def get_pipeline_template(self, props):
         dvbsrc_template = self.get_dvbsrc_pipeline_string(props)
         decode_template = get_decode_pipeline_string(props)
         template = "%s ! tee name=mpegtst ! " \
@@ -300,34 +287,12 @@ class DVB(DVBTSProducer):
             "@feeder:mpegts@" % (dvbsrc_template, decode_template)
         return template
 
+    def get_pipeline_string(self, props):
+        return avproducer.AVProducerBase.get_pipeline_string(self, props)
+
     def configure_pipeline(self, pipeline, props):
-        super(DVB, self).configure_pipeline(pipeline, props)
-        fr = props.get('framerate', (25, 2))
-        framerate = gst.Fraction(fr[0], fr[1])
-        # add volume effect
-        level = pipeline.get_by_name('level')
-        vol = volume.Volume('volume', level, pipeline)
-        self.addEffect(vol)
-        # add videorate effect
-        decoder = pipeline.get_by_name("videodecoder")
-        vr = videorate.Videorate('videorate',
-            decoder.get_pad("src"), pipeline, framerate)
-        self.addEffect(vr)
-        vr.plug()
-        # add deinterlacer effect
-        deinterlacer = deinterlace.Deinterlace('deinterlace',
-            vr.effectBin.get_pad('src'), pipeline,
-            props.get('deinterlace-mode', 'auto'),
-            props.get('deinterlace-method', 'ffmpeg'))
-        self.addEffect(deinterlacer)
-        deinterlacer.plug()
-        # add videoscaler
-        videoscaler = videoscale.Videoscale('videoscale', self,
-            deinterlacer.effectBin.get_pad("src"), pipeline,
-            props.get('width', 0), props.get('height', 0),
-            props.get('is-square', False))
-        self.addEffect(videoscaler)
-        videoscaler.plug()
+        DVBTSProducer.configure_pipeline(self, pipeline, props)
+        avproducer.AVProducerBase.configure_pipeline(self, pipeline, props)
 
         # attach pad monitors to make sure we know when there is no
         # audio or video coming out
@@ -339,15 +304,6 @@ class DVB(DVBTSProducer):
         if videodecoder:
             self._pad_monitors.attach(videodecoder.get_pad('src'),
                 "videodecoder")
-
-    def setVolume(self, value):
-        self.debug("Volume set to %d" % value)
-        element = self.get_element('volume')
-        element.set_property('volume', value)
-
-    def getVolume(self):
-        element = self.get_element('volume')
-        return element.get_property('volume')
 
 
 class MpegTSSplitter(DVBTSProducer):
@@ -370,85 +326,31 @@ class MpegTSSplitter(DVBTSProducer):
         return template
 
 
-class MpegTSDecoder(feedcomponent.ParseLaunchComponent):
+class MpegTSDecoder(avproducer.AVProducerBase):
 
-    def init(self):
-        pass
+    def get_raw_video_element(self):
+        return self.pipeline.get_by_name('videodecoder')
 
     def check_properties(self, props, addMessage):
         if props.get('scaled-width', None) is not None:
             self.warnDeprecatedProperties(['scaled-width'])
         if 'deinterlacer' in props:
             self.warnDeprecatedProperties(['deinterlacer'])
+        avproducer.AVProducerBase.check_properties(self, props, addMessage)
 
-        deintMode = props.get('deinterlace-mode', 'auto')
-        deintMethod = props.get('deinterlace-method', 'ffmpeg')
-
-        if deintMode not in deinterlace.DEINTERLACE_MODE:
-            msg = messages.Error(T_(N_("Configuration error: '%s' " \
-                "is not a valid deinterlace mode." % deintMode)))
-            addMessage(msg)
-            raise errors.ConfigError(msg)
-
-        if deintMethod not in deinterlace.DEINTERLACE_METHOD:
-            msg = messages.Error(T_(N_("Configuration error: '%s' " \
-                "is not a valid deinterlace method." % deintMethod)))
-            self.debug("'%s' is not a valid deinterlace method",
-                deintMethod)
-            addMessage(msg)
-            raise errors.ConfigError(msg)
-
-    def get_pipeline_string(self, props):
+    def get_pipeline_template(self, props):
         return get_decode_pipeline_string(props)
 
     def configure_pipeline(self, pipeline, props):
-        fr = props.get('framerate', (25, 2))
-        framerate = gst.Fraction(fr[0], fr[1])
-        # add volume effect
-        level = pipeline.get_by_name('level')
-        vol = volume.Volume('volume', level, pipeline)
-        self.addEffect(vol)
+        avproducer.AVProducerBase.configure_pipeline(self, pipeline, props)
 
         # attach pad monitors to make sure we know when there is no
-        # audio coming out
+        # audio or video coming out
         audiodecoder = pipeline.get_by_name('audiodecoder')
         if audiodecoder:
             self._pad_monitors.attach(audiodecoder.get_pad('src'),
                 "audiodecoder")
-
         videodecoder = pipeline.get_by_name('videodecoder')
-        if not videodecoder:
-            return
-        # add videorate effect
-        vr = videorate.Videorate('videorate',
-            videodecoder.get_pad("src"), pipeline, framerate)
-        self.addEffect(vr)
-        vr.plug()
-        # add deinterlacer effect
-        deinterlacer = deinterlace.Deinterlace('deinterlace',
-            vr.effectBin.get_pad('src'), pipeline,
-            props.get('deinterlace-mode', 'auto'),
-            props.get('deinterlace-method', 'ffmpeg'))
-        self.addEffect(deinterlacer)
-        deinterlacer.plug()
-        # add videoscaler
-        videoscaler = videoscale.Videoscale('videoscale', self,
-            deinterlacer.effectBin.get_pad("src"), pipeline,
-            props.get('width', 0), props.get('height', 0),
-            props.get('is-square', False))
-        self.addEffect(videoscaler)
-        videoscaler.plug()
-
-        # attach pad monitors to make sure we know when there is no
-        # video coming out
-        self._pad_monitors.attach(videodecoder.get_pad('src'),
+        if videodecoder:
+            self._pad_monitors.attach(videodecoder.get_pad('src'),
                                   "videodecoder")
-
-    def setVolume(self, value):
-        self.debug("Volume set to %d" % value)
-        element = self.get_element('volume')
-        element.set_property('volume', value)
-
-    def getVolume(self):
-        element = self.get_element('volume')
-        return element.get_property('volume')

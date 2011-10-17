@@ -21,7 +21,7 @@
       <wizard type="audio-producer" _description="DVB Audio"
               feeder="audio" />
 
-      <properties>
+      <properties xmlns:xi="http://www.w3.org/2001/XInclude">
         <!-- S, T or FILE -->
         <property name="dvb-type" type="string" required="true" 
                   _description="One of: T (for DVB-T), S (for DVB-S) or FILE." />
@@ -73,28 +73,18 @@
 	<!-- File specific properties -->
 	<property name="filename" type="string"
                   _description="The location of the TS file." />
-	<!-- output properties -->
-	<property name="width" type="int"
-                  _description="The width to capture the video at." />
-	<property name="height" type="int"
-                  _description="The height to capture the video at." />
+	  <!-- Audio/Video output properties -->
+        <xi:include href="flumotion/component/common/avproducer/properties.xml"/>
+	<!-- ignored, but kept for backward compatibility -->
+	<!-- deprecated properties -->
+	<property name="pids" type="string"
+                  _description="Deprecated" />
 	<property name="scaled-width" type="int"
-                  _description="The width to scale the video to." />
-	<property name="framerate" type="fraction"
-                  _description="Output framerate" />
+                  _description="Deprecated" />
         <property name="pixel-aspect-ratio" type="fraction"
-                  _description="The pixel-aspect-ratio (Deprecated)" />
-        <property name="is-square" type="bool"
-                  _description="Whether to scale to a 1:1 pixel aspect ratio." />
-	<property name="deinterlace-mode" type="string"
-                  _description="Deinterlace mode.(Default=auto)" />
-	<property name="deinterlace-method" type="string"
-                  _description="Deinterlace method.(Default=ffmpeg)" />
+                  _description="Deprecated" />
 	<property name="deinterlacer" type="string"
                   _description="Deprecated" />
-	<!-- ignored, but kept for backward compatibility -->
-	<property name="pids" type="string"
-                  _description="Ignored, kept for backward compatibility" />
       </properties>
     </component>
 
@@ -183,7 +173,7 @@
 
       </entries>
 
-      <properties>
+      <properties xmlns:xi="http://www.w3.org/2001/XInclude">
         <property name="program-number" type="int" required="true"
                   _description="Program number to demux for" />
 	<!-- audio pid: optional argument used to identify the audio
@@ -191,24 +181,7 @@
 	<property name="audio-pid" type="int" required="false"
                   _description="The  audio pid that we want to use, in the case there may be many" />
 	<!-- output properties -->
-	<property name="width" type="int"
-                  _description="The width to capture the video at." />
-	<property name="height" type="int"
-                  _description="The height to capture the video at." />
-	<property name="scaled-width" type="int"
-                  _description="The width to scale the video to." />
-	<property name="framerate" type="fraction"
-                  _description="Output framerate" />
-        <property name="pixel-aspect-ratio" type="fraction"
-                  _description="The pixel-aspect-ratio (Deprecated)" />
-        <property name="is-square" type="bool"
-                  _description="Whether to scale to a 1:1 pixel aspect ratio." />
-	<property name="deinterlace-mode" type="string"
-                  _description="Deinterlace mode.(Default=auto)" />
-	<property name="deinterlace-method" type="string"
-                  _description="Deinterlace method.(Default=ffmpeg)" />
-	<property name="deinterlacer" type="string"
-                  _description="Deprecated" />
+        <xi:include href="flumotion/component/common/avproducer/properties.xml"/>
 	<property name="has-video" type="bool" required="false"
                   _description="Wether we want to capture video from the source" />
 	<property name="video-parser" type="string" required="false"
@@ -217,6 +190,13 @@
                   _description="Video decoder the component should use" />
 	<property name="audio-decoder" type="string" required="false"
                   _description="Audio decoder the component should use" />
+	<!-- deprecated properties -->
+	<property name="scaled-width" type="int"
+                  _description="Deprecated" />
+        <property name="pixel-aspect-ratio" type="fraction"
+                  _description="Deprecated" />
+	<property name="deinterlacer" type="string"
+                  _description="Deprecated" />
       </properties>
     </component>
 
@@ -236,12 +216,8 @@
 
     <bundle project="dvb" name="dvb-component">
        <dependencies>
-           <dependency name="component" />
            <dependency name="dvb-base" />
-           <dependency name="volume-effect" />
-           <dependency name="deinterlace-effect" />
-           <dependency name="videoscale-effect" />
-           <dependency name="videorate-effect" />
+           <dependency name="avproducer" />
        </dependencies>
 
        <directories>
@@ -253,10 +229,7 @@
     <bundle project="dvb" name="dvb-admin-gtk">
        <dependencies>
            <dependency name="dvb-base" />
-	   <dependency name="base-admin-gtk" />
-	   <dependency name="volume-admin-gtk" />
-           <dependency name="deinterlace-admin-gtk" />
-           <dependency name="videoscale-admin-gtk" />
+	   <dependency name="avproducer-admin-gtk" />
        </dependencies>
 
        <directories>

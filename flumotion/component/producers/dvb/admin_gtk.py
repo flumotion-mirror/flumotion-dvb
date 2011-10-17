@@ -15,18 +15,9 @@
 #
 # Headers in this file shall remain intact.
 
-
-import os
-
-from gettext import gettext as _
-
 from flumotion.component.base.admin_gtk import BaseAdminGtk
 from flumotion.component.base.baseadminnode import BaseAdminGtkNode
-from flumotion.component.effects.volume import admin_gtk as vadmin_gtk
-from flumotion.component.effects.deinterlace.admin_gtk import \
-    DeinterlaceAdminGtkNode
-from flumotion.component.effects.videoscale.admin_gtk import \
-    VideoscaleAdminGtkNode
+from flumotion.component.common.avproducer.admin_gtk import AVProducerAdminGtk
 from kiwi.ui.objectlist import Column, ObjectList
 
 # Copied from component/base/admin_gtk.py
@@ -252,77 +243,7 @@ class DVBServiceInformationAdminGtkNode(BaseAdminGtkNode):
         pass
 
 
-class DecoderBaseAdminGtk(BaseAdminGtk):
-
-    def setup(self):
-        volume = vadmin_gtk.VolumeAdminGtkNode(self.state, self.admin,
-                                               'volume', title=_("Volume"))
-        self.nodes['Volume'] = volume
-
-        deinterlace = DeinterlaceAdminGtkNode(self.state, self.admin,
-                                    'deinterlace', 'Deinterlacing')
-        self.nodes['Deinterlace'] = deinterlace
-
-        if 'FLU_VIDEOSCALE_DEBUG' in os.environ:
-            videoscale = VideoscaleAdminGtkNode(self.state, self.admin,
-                'videoscale', 'Video scaling')
-            self.nodes['Videoscale'] = videoscale
-
-        return BaseAdminGtk.setup(self)
-
-    def component_volumeChanged(self, channel, rms, peak, decay):
-        volume = self.nodes['Volume']
-        volume.volumeChanged(channel, rms, peak, decay)
-
-    def component_effectVolumeSet(self, effect, volume):
-        """
-        @param volume: volume multiplier between 0.0 and 4.0
-        @type  volume: float
-        """
-        if effect != 'inputVolume':
-            self.warning('Unknown effect %s in %r' % (effect, self))
-            return
-        v = self.nodes['Volume']
-        v.volumeSet(volume)
-
-    def component_effectModeSet(self, effect, mode):
-        """
-        @param mode: deinterlace mode
-        @type  volume: string
-        """
-        if effect != 'deinterlace':
-            self.warning('Unknown effect %s in %r' % (effect, self))
-            return
-        v = self.nodes['Deinterlace']
-        v.modeSet(mode)
-
-    def component_effectMethodSet(self, effect, mode):
-        """
-        @param mode: deinterlace method
-        @type  volume: string
-        """
-        if effect != 'deinterlace':
-            self.warning('Unknown effect %s in %r' % (effect, self))
-            return
-        v = self.nodes['Deinterlace']
-        v.methodSet(mode)
-
-    def component_effectWidthSet(self, effect, width):
-        if effect != 'videoscale':
-            self.warning('Unknown effect %s in %r' % (effect, self))
-            return
-        v = self.nodes['Videoscale']
-        v.widthSet(width)
-
-    def component_effectHeightSet(self, effect, height):
-        if effect != 'videoscale':
-            self.warning('Unknown effect %s in %r' % (effect, self))
-            return
-        v = self.nodes['Videoscale']
-        v.heightSet(height)
-
-
-class DVBAdminGtk(DecoderBaseAdminGtk):
+class DVBAdminGtk(AVProducerAdminGtk):
 
     def setup(self):
         dvbnode = SignalStatisticsAdminGtkNode(self.state, self.admin,
@@ -331,13 +252,11 @@ class DVBAdminGtk(DecoderBaseAdminGtk):
         channelsnode = DVBServiceInformationAdminGtkNode(self.state,
             self.admin, title="Channel Information")
         self.nodes["Channel Information"] = channelsnode
-        return DecoderBaseAdminGtk.setup(self)
+        return AVProducerAdminGtk.setup(self)
 
 
-class MpegTSDecoderAdminGtk(DecoderBaseAdminGtk):
-
-    def setup(self):
-        return DecoderBaseAdminGtk.setup(self)
+class MpegTSDecoderAdminGtk(AVProducerAdminGtk):
+    pass
 
 
 class MpegTSSplitterAdminGtk(BaseAdminGtk):
