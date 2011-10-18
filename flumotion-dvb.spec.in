@@ -20,7 +20,7 @@ BuildRequires:  flumotion
 Flumotion DVB support.
 
 %prep
-%setup -q
+%setup -q -n @PACKAGE_TARNAME@-@PACKAGE_VERSION@
 
 %build
 %configure
