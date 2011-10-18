@@ -6,7 +6,7 @@ Summary:        Flumotion DVB support
 Group:          Applications/Internet
 License:	LGPL
 URL:            http://www.flumotion.net/
-Source:         %{name}-%{version}.tar.bz2
+Source:         @PACKAGE_TARNAME@-@PACKAGE_VERSION@.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Requires:	flumotion > @FLU_REQ@
