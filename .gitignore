@@ -65,3 +65,4 @@ po/stamp-it
 po/flumotion-dvb.pot
 po/remove-potcdate.sed
 po/*gmo
+po/*~
