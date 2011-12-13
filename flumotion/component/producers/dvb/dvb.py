@@ -199,7 +199,7 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
         @param bus: the message bus sending the message
         @param message: the message received
         """
-        self.debug("Bus message received %r", message)
+        self.log("Bus message received %r", message)
         if message.structure.get_name() == 'dvb-frontend-stats':
             # we have frontend stats, lets update ui state
             s = message.structure
@@ -209,16 +209,16 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
             self.uiState.set('unc', s["unc"])
             self.uiState.set('lock', s["lock"])
         elif message.structure.get_name() == 'pat':
-            self.debug("PAT info received")
+            self.log("PAT info received")
             s = message.structure
             for prog in s["programs"]:
-                self.debug("PAT: Program %d on PID 0x%04x",
+                self.log("PAT: Program %d on PID 0x%04x",
                     prog["program-number"], prog["pid"])
         elif message.structure.get_name() == 'pmt':
             s = message.structure
-            self.debug("PMT info received for program %d", s["program-number"])
+            self.log("PMT info received for program %d", s["program-number"])
             for stream in s["streams"]:
-                self.debug("PMT: Stream on pid 0x%04x of type: %d",
+                self.log("PMT: Stream on pid 0x%04x of type: %d",
                     stream["pid"],
                     stream["stream-type"])
         elif message.structure.get_name() == "sdt":
@@ -232,12 +232,12 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
                     if service.has_field("name"):
                         name = service["name"]
                     if sid in self.program_numbers:
-                        self.debug("Setting channel %s to have name %s",
+                        self.log("Setting channel %s to have name %s",
                             sid, name)
                         self.uiState.setitem('channelnames', sid, name)
         elif message.structure.get_name() == "eit":
             s = message.structure
-            self.debug("eit received for sid %d", s["service-id"])
+            self.log("eit received for sid %d", s["service-id"])
             if str(s["service-id"]) in self.program_numbers:
                 events = s["events"]
                 for e in events:
@@ -249,14 +249,14 @@ dvbbasebin polarity=%(polarity)s symbol-rate=%(symbol_rate)s
                             txt = "%s %s" % (txt, e["name"])
                         if e.has_field("description"):
                             txt = "%s: %s" % (txt, e["description"])
-                        self.debug("Now on channel %s: %s",
+                        self.log("Now on channel %s: %s",
                             str(s["service-id"]), txt)
                         self.uiState.setitem('whatson', str(s["service-id"]),
                             txt)
                     name = "None"
                     if e.has_field("name"):
                         name = e["name"]
-                    self.debug("event %s of running status: %d",
+                    self.log("event %s of running status: %d",
                         name,
                         e["running-status"])
 
