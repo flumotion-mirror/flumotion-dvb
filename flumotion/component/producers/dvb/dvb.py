@@ -43,7 +43,7 @@ def get_decode_pipeline_string(props):
     if audio_pid > 0:
         # transport stream demuxer expects this as 4 digit hex
         audio_pid_template = "audio_%04x " % audio_pid
-    template = '%(demuxer) name=demux program-number=%(program_number)d' \
+    template = '%(demuxer)s name=demux program-number=%(program_number)d' \
         ' demux.%(audiopid)s ! ' \
         ' queue max-size-buffers=0 max-size-time=0' \
         ' ! %(audiodec)s name=audiodecoder' \
