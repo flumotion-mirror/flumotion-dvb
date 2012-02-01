@@ -33,6 +33,7 @@ def get_decode_pipeline_string(props):
     video_parser = props.get('video-parser', 'mpegvideoparse')
     video_decoder = props.get('video-decoder', 'mpeg2dec')
     audio_decoder = props.get('audio-decoder', 'mad')
+    demuxer = props.get('demuxer', 'flutsdemux')
     program_number = props.get('program-number')
     audio_pid = props.get('audio-pid', 0)
     # identity to check for imperfect timestamps also for
@@ -42,7 +43,7 @@ def get_decode_pipeline_string(props):
     if audio_pid > 0:
         # transport stream demuxer expects this as 4 digit hex
         audio_pid_template = "audio_%04x " % audio_pid
-    template = 'flutsdemux name=demux program-number=%(program_number)d' \
+    template = '%(demuxer) name=demux program-number=%(program_number)d' \
         ' demux.%(audiopid)s ! ' \
         ' queue max-size-buffers=0 max-size-time=0' \
         ' ! %(audiodec)s name=audiodecoder' \
@@ -52,6 +53,7 @@ def get_decode_pipeline_string(props):
         ' ! tee name=t ! @feeder:audio@' % dict(
             audiopid=audio_pid_template,
             audiodec=audio_decoder,
+            demuxer=demuxer,
             identity=idsync_template,
             program_number=program_number)
     if has_video:

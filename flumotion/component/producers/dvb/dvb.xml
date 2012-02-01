@@ -37,6 +37,8 @@
                   _description="Video decoder the component should use" />
 	<property name="audio-decoder" type="string" required="false"
                   _description="Audio decoder the component should use" />
+	<property name="demuxer" type="string" required="false"
+                  _description="Demuxer the component should use (default:flutsdemux)" />
 	<!-- audio pid: optional argument used to identify the audio
 	     pid that we want to use, in the case there may be many -->
 	<property name="audio-pid" type="int" required="false"
@@ -190,6 +192,8 @@
                   _description="Video decoder the component should use" />
 	<property name="audio-decoder" type="string" required="false"
                   _description="Audio decoder the component should use" />
+	<property name="demuxer" type="string" required="false"
+                  _description="Demuxer the component should use (default:flutsdemux)" />
 	<!-- deprecated properties -->
 	<property name="scaled-width" type="int"
                   _description="Deprecated" />
