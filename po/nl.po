@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: flumotion-dvb 0.10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-10-06 11:54+0000\n"
+"POT-Creation-Date: 2012-02-03 10:48+0100\n"
 "PO-Revision-Date: 2005-07-28 12:41+0200\n"
 "Last-Translator: Thomas Vander Stichele <thomas at fluendo dot com>\n"
 "Language-Team: nl \n"
@@ -20,22 +20,6 @@ msgstr ""
 msgid "To use DVB-%s mode, you need to specify property '%s'."
 msgstr ""
 
-#: flumotion/component/producers/dvb/dvb.py:281
-#: flumotion/component/producers/dvb/dvb.py:388
-#, python-format
-msgid "Configuration error: '%s' is not a valid deinterlace mode."
-msgstr ""
-
-#: flumotion/component/producers/dvb/dvb.py:287
-#: flumotion/component/producers/dvb/dvb.py:394
-#, python-format
-msgid "Configuration error: '%s' is not a valid deinterlace method."
-msgstr ""
-
-#: flumotion/component/producers/dvb/admin_gtk.py:259
-msgid "Volume"
-msgstr ""
-
 #: flumotion/component/producers/dvb/wizard_gtk.py:93
 msgid "Original Version"
 msgstr ""
@@ -44,51 +28,51 @@ msgstr ""
 msgid "Audio description"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:196
-#: flumotion/component/producers/dvb/wizard_gtk.py:198
+#: flumotion/component/producers/dvb/wizard_gtk.py:195
+#: flumotion/component/producers/dvb/wizard_gtk.py:197
 msgid "Probing DVB Channels"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:197
+#: flumotion/component/producers/dvb/wizard_gtk.py:196
 msgid "Probing DVB"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:199
-#: flumotion/component/producers/dvb/wizard_gtk.py:514
+#: flumotion/component/producers/dvb/wizard_gtk.py:198
+#: flumotion/component/producers/dvb/wizard_gtk.py:512
 msgid "Production"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:226
+#: flumotion/component/producers/dvb/wizard_gtk.py:225
 msgid "The selected stream doesn't contain a suitable video feed."
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:275
-#: flumotion/component/producers/dvb/wizard_gtk.py:575
+#: flumotion/component/producers/dvb/wizard_gtk.py:274
+#: flumotion/component/producers/dvb/wizard_gtk.py:573
 msgid "Checking for DVB elements..."
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:287
+#: flumotion/component/producers/dvb/wizard_gtk.py:286
 msgid "Checking for DVB adapters..."
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:307
+#: flumotion/component/producers/dvb/wizard_gtk.py:306
 msgid "No adapter found."
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:398
+#: flumotion/component/producers/dvb/wizard_gtk.py:396
 msgid "Scan finished"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:403
+#: flumotion/component/producers/dvb/wizard_gtk.py:401
 msgid "No channels found"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:511
-#: flumotion/component/producers/dvb/wizard_gtk.py:512
+#: flumotion/component/producers/dvb/wizard_gtk.py:509
+#: flumotion/component/producers/dvb/wizard_gtk.py:510
 msgid "DVB A/V Configuration"
 msgstr ""
 
-#: flumotion/component/producers/dvb/wizard_gtk.py:513
+#: flumotion/component/producers/dvb/wizard_gtk.py:511
 msgid "DVB A/V"
 msgstr ""
 
